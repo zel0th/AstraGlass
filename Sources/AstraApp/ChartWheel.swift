@@ -38,14 +38,15 @@ struct ChartWheel: View {
             let radius = max(1, diameter * 0.452)
             let labelScale = max(0.8, radius / 262)
             let markers = markerPositions(radius: radius, center: center)
+            let conjunctions = ChartWheelGeometry.conjunctionMarkers(aspects: visibleAspects, positions: positionsByID, asc: asc, radius: radius, center: center)
             ZStack {
                 Canvas { context, _ in
-                    drawWheel(context: &context, center: center, radius: radius, markers: markers)
+                    drawWheel(context: &context, center: center, radius: radius, markers: markers, conjunctions: conjunctions)
                 }.allowsHitTesting(false).accessibilityHidden(true)
 
                 // A generous transparent corridor follows each real aspect line.
                 // Its button is also independently reachable with accessibility.
-                ForEach(visibleAspects) { aspect in
+                ForEach(visibleAspects.filter { abs($0.angle) >= 0.01 }) { aspect in
                     if let pair = aspectEndpoints(aspect, radius: radius, center: center) {
                         let frame = segmentFrame(pair.0, pair.1)
                         let start = CGPoint(x: pair.0.x - frame.minX, y: pair.0.y - frame.minY)
@@ -61,6 +62,24 @@ struct ChartWheel: View {
                         .help(aspectDescription(aspect))
                         .accessibilityLabel(aspectDescription(aspect))
                         .accessibilityHint(L10n.text("Открыть трактовку аспекта", "Open the aspect interpretation"))
+                    }
+                }
+
+                ForEach(visibleAspects.filter { abs($0.angle) < 0.01 }) { aspect in
+                    if let location = conjunctions[aspect.id] {
+                        Button { selectAspect(aspect) } label: {
+                            Text(AstroStyle.aspectGlyph(aspect.angle))
+                                .font(AstroStyle.symbolFont(size: 17 * labelScale))
+                                .foregroundStyle(AstroStyle.aspectColor(aspect.angle))
+                                .frame(width: 24 * labelScale, height: 24 * labelScale)
+                                .background(.background, in: Circle())
+                                .background(AstroStyle.aspectColor(aspect.angle).opacity(0.12), in: Circle())
+                                .overlay(Circle().strokeBorder(AstroStyle.aspectColor(aspect.angle).opacity(selectedAspect?.id == aspect.id ? 1 : 0.45), lineWidth: selectedAspect?.id == aspect.id ? 2 : 1))
+                                .contentShape(Circle())
+                        }.buttonStyle(.plain).position(location)
+                            .help(aspectDescription(aspect))
+                            .accessibilityLabel(aspectDescription(aspect))
+                            .accessibilityHint(L10n.text("Открыть трактовку соединения", "Open the conjunction interpretation"))
                     }
                 }
 
@@ -105,9 +124,16 @@ struct ChartWheel: View {
         .accessibilityLabel(L10n.text("Зодиакальный круг", "Zodiac chart"))
     }
 
-    private func drawWheel(context: inout GraphicsContext, center: CGPoint, radius: CGFloat, markers: [Int: CGPoint]) {
+    private func drawWheel(context: inout GraphicsContext, center: CGPoint, radius: CGFloat, markers: [Int: CGPoint], conjunctions: [String: CGPoint]) {
         let labelScale = max(0.8, radius / 262)
         let ink = Color.primary.opacity(colorScheme == .dark ? 0.22 : 0.14)
+        for (index, cusp) in snapshot.houseCusps.enumerated() {
+            let next = snapshot.houseCusps[(index + 1) % snapshot.houseCusps.count]
+            let sector = ChartWheelGeometry.houseSector(start: cusp, end: next, asc: asc, radius: radius, center: center)
+            // Natural house elements: 1/5/9 fire, 2/6/10 earth,
+            // 3/7/11 air, 4/8/12 water, independent of the cusp's sign.
+            context.fill(sector, with: .color(AstroStyle.elementColors[index % 4].opacity(colorScheme == .dark ? 0.09 : 0.07)))
+        }
         for scale in [1.0, 0.85, 0.56] {
             let r = radius * scale
             context.stroke(Path(ellipseIn: CGRect(x: center.x-r, y: center.y-r, width: 2*r, height: 2*r)), with: .color(ink), lineWidth: scale == 1 ? 1.3 : 0.7)
@@ -132,6 +158,10 @@ struct ChartWheel: View {
             let selected = selectedAspect?.id == aspect.id
             let highlighted = selected || selectedPlanet == 0 || aspect.first == selectedPlanet || aspect.second == selectedPlanet
             var path = Path(); path.move(to: pair.0); path.addLine(to: pair.1)
+            if let badge = conjunctions[aspect.id], let first = positionsByID[aspect.first], let second = positionsByID[aspect.second] {
+                path.move(to: point(ChartWheelGeometry.midpoint(first.longitude, second.longitude), radius: radius * 0.55, center: center))
+                path.addLine(to: badge)
+            }
             context.stroke(path, with: .color(AstroStyle.aspectColor(aspect.angle).opacity(selected ? 1 : highlighted ? 0.65 : 0.20)), style: StrokeStyle(lineWidth: selected ? 2.8 : highlighted ? 1.3 : 0.8, dash: Int(aspect.angle) == 180 ? [4, 3] : []))
         }
         for (label, longitude) in [("ASC", asc), ("DSC", asc + 180)] {
@@ -151,8 +181,7 @@ struct ChartWheel: View {
     }
 
     private func point(_ longitude: Double, radius: CGFloat, center: CGPoint) -> CGPoint {
-        let angle = (180 + asc - longitude) * Double.pi / 180
-        return CGPoint(x: center.x + cos(angle) * radius, y: center.y + sin(angle) * radius)
+        ChartWheelGeometry.point(longitude, asc: asc, radius: radius, center: center)
     }
 
     /// Keep labels apart when extra points or a tight conjunction are enabled.

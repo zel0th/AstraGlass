@@ -12,9 +12,10 @@
     "Settings invalidate stale results, filter the actual engine snapshot and persist",
     "Unavailable interpretation collections are absent from the picker and stale selections are harmless",
     "JSON database autosave, update without duplicates, relaunch, recalculation and second-chart reopen",
-    "Whole database import\/export, refreshed list, imported chart calculation and duplicate-free reimport"
+    "Whole database import\/export, refreshed list, imported chart calculation and duplicate-free reimport",
+    "Editor library load preserves record identity, avoids overwriting another chart, supports second chart; conjunction inspector selection"
   ],
   "failed" : 0,
-  "passed" : 13,
-  "timestamp" : "2026-11-04T20:59:32Z"
+  "passed" : 14,
+  "timestamp" : "2026-11-04T21:30:12Z"
 }

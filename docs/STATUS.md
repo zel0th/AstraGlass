@@ -1,6 +1,6 @@
 # AstraGlass — continuation checkpoint
 
-Updated: 5 November 2026 (Moscow). Version **0.3.2**.
+Updated: 5 November 2026 (Moscow). Version **0.3.3**.
 
 ## Repository and authorization
 - Continue this repository, not the old AstrologMac project.
@@ -13,36 +13,35 @@ Updated: 5 November 2026 (Moscow). Version **0.3.2**.
 - Offline atlas: 33,702 cities, filtering from first character, Russian aliases, historical UTC/DST.
 - Bundled astrology font including traditional Pluto, explicit object colors (Sun/Mars red), 40 house-system explanations.
 - Settings for language, objects/aspects, appearance and installed interpretation collections.
-- Versioned atomic JSON chart database with backup, autosave on Apply, reopen/edit/second-chart/delete.
+- Atomic versioned JSON chart database with backup, autosave, reopen/edit/second-chart/delete and whole-database merge import/export.
 - Local Podvodny corpus: 823 sections / 4 documents. Russian-only lookup/search/PDF; absent custom corpus hidden.
+- Txt3 remains retired: hidden from settings, excluded by build whitelist and package validators; original kept only in PrivateCorpus.
+- Responsive ChartDashboardLayout, proportional glyph scaling, bottom summary strip; inspector default 800, resizable 360–1200.
 
-## 0.3.2 requested changes
-- ChartDashboardLayout measures actual header/footer and fills remaining viewport height; no 580-point cap.
-- Circle and glyphs scale together; Sun/Moon/ASC strip stays at bottom as window grows; short windows scroll.
-- Inspector default 800 points, resizable 360–1200; stable ZStack detail container preserves width across sections.
-- Whole database import/export in My Charts and Chart menu; UUID merge, newer revision wins, equal date keeps local.
-- Validate entire incoming file before writing; repeat imports are no-ops; preserve local-only records and backup.
-- Txt3 removed from selectable packs and build resources. Old persisted txt3 selection falls back to Podvodny.
-- Original Txt3 archive/index retained only in PrivateCorpus for future user cleanup; importer kept as preparation tool.
-- Build uses explicit Podvodny whitelist; package/bundle validators reject retired interpretations-txt3.json.
+## 0.3.3 requested changes
+- Conjunctions have separate visible blue ☌ buttons in the inner aspect field, with collision avoidance and leaders.
+- Exact conjunctions and the 359°/1° boundary remain selectable; button opens the existing aspect inspector.
+- Shared aspect palette: conjunction blue, trine green, square/opposition/semisquare/sesquisquare red, sextile teal.
+- Subtle annular house fills follow actual cusps; natural house elements repeat fire/earth/air/water (index % 4).
+- Editor month/day/hour use menu pickers; year/minute stay manual. Days use engine-compatible Julian/Gregorian leap rules.
+- Changing month/year clamps the day; imported invalid input is still rejected, never silently normalized.
+- Editor “Из библиотеки…” searches saved JSON records by title/place/date and loads every field into the draft.
+- Cancel leaves workspace/database untouched. Apply updates the explicitly loaded UUID rather than the previously open chart.
+- The saved-record chooser also works for the secondary chart. Loading an existing record is editing it, not cloning it.
 
 ## Validation this milestone
-- Database CRUD/backup, full JSON round trip, repeat import, revision merge, local-only preservation, four invalid imports, empty export passed.
-- Workspace: 13 groups passed with real engine, including imported-chart recalculation.
-- Resources: font/glyphs/colors, house descriptions and Podvodny 823/4 passed.
-- PDF: 18 A4 pages, all 45 synthetic paragraphs and final Cyrillic marker, attribution/deduplication passed.
-- Localization: 302 keys match, no missing static labels.
-- GUI: tall/short windows show proportional chart and moving lower strip; exported/reimported database reports 0 added / 0 updated / 1 unchanged.
-- Final GUI verified: inspector retains 800-point width when switching Chart → My Charts → Chart; tall/short layouts confirmed.
-- Core 18 groups and atlas 27 checks passed. Both DMG/ZIP packages passed signatures, readonly mounts and relocated engine checks.
-- Public package has no private corpus; personal package has Podvodny only; Txt3 absent in both.
-- Release URL: https://github.com/zel0th/AstraGlass/releases/tag/v0.3.2
-- Personal DMG saved for private delivery; release evidence: docs/validation/distribution-0.3.2.json.
+- Core: 18 groups with real engine; atlas: 27 checks. Workspace: 14 groups, including loaded UUID and primary/secondary isolation.
+- Resources: font/glyphs/colors, 10 independently spaced conjunctions at three chart sizes, 12 sectors including 0° wrap, calendar transitions, Podvodny 823/4.
+- PDF: 18 A4 pages, all 45 synthetic paragraphs and final Cyrillic marker, attribution/deduplication.
+- Localization: 302 matching keys, no missing static labels. git diff --check passed.
+- GUI: conjunction opens correct interpretation; house fills and colors visible; month/day/hour dropdowns, February 2000→2001 clamp, manual minutes checked.
+- GUI: saved-chart search and Enter load restore automatic UTC; Cancel restores previous chart without applying draft.
+- Both DMG/ZIP packages passed signatures, readonly mount and relocated engine checks; public corpus absent, personal Podvodny only.
+- Evidence: docs/validation/distribution-0.3.3.json. Release target: https://github.com/zel0th/AstraGlass/releases/tag/v0.3.3
 
 ## Reproduce
 ```sh
 bash scripts/test.sh
-bash scripts/test-database.sh
 bash scripts/test-workspace.sh
 bash scripts/test-resources.sh
 bash scripts/test-pdf.sh
@@ -52,9 +51,9 @@ bash scripts/package.sh --with-corpus
 ```
 
 ## Distribution and boundaries
-- Public source/release assets exclude PrivateCorpus, interpretations*.json, books, personal charts and personal packages.
+- Public source/release excludes PrivateCorpus, interpretations*.json, books, personal charts and personal packages.
 - Personal DMG includes Podvodny; deliver privately. Both packages embed Astrolog, no Homebrew required.
-- hdiutil needs native runtime here; restricted shell cannot configure disk-image device.
+- hdiutil requires native runtime here; restricted shell cannot configure disk-image device.
 - Ad-hoc signing only, no Developer ID/notarization. No full Astrolog parity; see FEATURES.md.
-- Some minor bodies require extra ephemerides; no fabricated positions. Progressions, animation and .as import remain future work.
-- Previous performance: 100 calculations, mean 36.53 ms; GUI 182.28 MiB/2.618% CPU exploratory profile, not controlled idle. See PERFORMANCE.md.
+- Some minor bodies need extra ephemerides; no fabricated positions. Progressions, animation and .as import remain future work.
+- Previous performance: 100 calculations, mean 36.53 ms; GUI 182.28 MiB/2.618% CPU exploratory, not controlled idle. See PERFORMANCE.md.

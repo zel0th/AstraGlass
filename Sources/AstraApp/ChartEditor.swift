@@ -16,10 +16,16 @@ struct ChartEditor: View {
     @StoredState private var initialized = false
     @StoredState private var resolvedCivilFields: [Int] = []
     @StoredState private var resolvedAutomaticTimeZone = false
+    @StoredState private var loadedChartID: UUID?
     private let atlas = CityAtlas.shared
     private var civilFields: [Int] { [input.year, input.month, input.day, input.hour, input.minute] }
     private var selectedCity: AtlasCity? { atlas.city(id: input.cityID) }
     private var selectedMatch: CivilTimeMatch? { matches.indices.contains(occurrence) ? matches[occurrence] : nil }
+    private var monthNames: [String] {
+        L10n.text("Январь|Февраль|Март|Апрель|Май|Июнь|Июль|Август|Сентябрь|Октябрь|Ноябрь|Декабрь",
+                  "January|February|March|April|May|June|July|August|September|October|November|December")
+            .components(separatedBy: "|")
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
@@ -29,7 +35,7 @@ struct ChartEditor: View {
                     Text(L10n.text("Дата, местное время и место рождения или события", "Date, local time and place of birth or event")).foregroundStyle(.secondary)
                 }
                 Spacer()
-                Image(systemName: "sparkles").font(.title).foregroundStyle(AstroStyle.accent)
+                SavedChartPicker(model: model, selectedID: loadedChartID, choose: loadSavedChart)
             }
             TextField(L10n.text("Название карты", "Chart title"), text: $title).textFieldStyle(.roundedBorder)
             HStack(alignment: .top, spacing: 20) {
@@ -56,12 +62,17 @@ struct ChartEditor: View {
                     GroupBox(L10n.text("Местное время", "Local time")) {
                         VStack(alignment: .leading, spacing: 12) {
                             HStack {
-                                numberField(L10n.text("Год", "Year"), value: $input.year)
-                                numberField(L10n.text("Месяц", "Month"), value: $input.month)
-                                numberField(L10n.text("День", "Day"), value: $input.day)
+                                numberField(L10n.text("Год", "Year"), value: calendarBinding(\.year)).frame(width: 85)
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(L10n.text("Месяц", "Month")).font(.caption).foregroundStyle(.secondary)
+                                    Picker(L10n.text("Месяц", "Month"), selection: calendarBinding(\.month)) {
+                                        ForEach(1...12, id: \.self) { Text(monthNames[$0 - 1]).tag($0) }
+                                    }.labelsHidden().pickerStyle(.menu)
+                                }.frame(maxWidth: .infinity)
+                                integerPicker(L10n.text("День", "Day"), value: $input.day, range: 1...input.daysInMonth).frame(width: 75)
                             }
                             HStack {
-                                numberField(L10n.text("Час", "Hour"), value: $input.hour)
+                                integerPicker(L10n.text("Час", "Hour"), value: $input.hour, range: 0...23)
                                 numberField(L10n.text("Минуты", "Minute"), value: $input.minute)
                             }
                             Toggle(L10n.text("Часовой пояс автоматически", "Automatic time zone"), isOn: $automaticTimeZone)
@@ -136,6 +147,27 @@ struct ChartEditor: View {
             Text(label).font(.caption).foregroundStyle(.secondary)
             TextField(label, value: value, format: .number.grouping(.never)).labelsHidden()
         }
+    }
+
+    private func integerPicker(_ label: String, value: Binding<Int>, range: ClosedRange<Int>) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(label).font(.caption).foregroundStyle(.secondary)
+            Picker(label, selection: value) {
+                ForEach(Array(range), id: \.self) { Text(String(format: "%02d", $0)).tag($0) }
+            }.labelsHidden().pickerStyle(.menu)
+        }.frame(maxWidth: .infinity)
+    }
+
+    private func calendarBinding(_ field: WritableKeyPath<ChartInput, Int>) -> Binding<Int> {
+        Binding(get: { input[keyPath: field] }, set: { input.setCalendarField(field, to: $0) })
+    }
+
+    private func loadSavedChart(_ item: StoredChart) {
+        // Do not apply, calculate or save until the user presses Apply.
+        input = item.chart.input; title = item.chart.title; place = item.chart.place
+        loadedChartID = item.id
+        automaticTimeZone = input.usesAutomaticTimeZone ?? false
+        refreshTimeZone(preserveOffset: true)
     }
 
     private func choose(_ city: AtlasCity) {
@@ -216,7 +248,7 @@ struct ChartEditor: View {
             input.usesAutomaticTimeZone = automaticTimeZone
             try input.validate()
             let chart = SavedChart(title: title.isEmpty ? L10n.text("Без названия", "Untitled") : title, place: place, input: input)
-            try model.commitEditorChart(chart, secondary: secondary)
+            try model.commitEditorChart(chart, secondary: secondary, loadedChartID: loadedChartID)
             dismiss()
         } catch { validationError = error.localizedDescription }
     }

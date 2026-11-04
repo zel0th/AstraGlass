@@ -62,7 +62,13 @@ enum AstroStyle {
         switch Int(angle.rounded()) { case 0: return "☌"; case 60: return "✶"; case 90: return "□"; case 120: return "△"; case 180: return "☍"; default: return "∠" }
     }
     static func aspectColor(_ angle: Double) -> Color {
-        [90, 180, 45, 135].contains(Int(angle.rounded())) ? .orange : ([60, 120].contains(Int(angle.rounded())) ? .teal : accent)
+        switch Int(angle.rounded()) {
+        case 0: return .blue
+        case 90, 180, 45, 135: return .red
+        case 120: return .green
+        case 60: return .teal
+        default: return accent
+        }
     }
 }
 

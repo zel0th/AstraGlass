@@ -40,15 +40,25 @@ public struct ChartInput: Codable, Hashable, Sendable {
         return result
     }
 
+    /// Match the Julian/Gregorian leap-year rule used by the engine and validation.
+    public var daysInMonth: Int {
+        guard (1...12).contains(month) else { return 31 }
+        let leap = year % 4 == 0 && (year <= 1582 || year % 100 != 0 || year % 400 == 0)
+        return [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1]
+    }
+
+    public mutating func setCalendarField(_ field: WritableKeyPath<ChartInput, Int>, to value: Int) {
+        self[keyPath: field] = value
+        day = min(max(1, day), daysInMonth)
+    }
+
     public func validate() throws {
         guard (-3000...3000).contains(year), (1...12).contains(month), (1...31).contains(day),
               (0...23).contains(hour), (0...59).contains(minute),
               utcOffset.isFinite, (-14...14).contains(utcOffset), longitude.isFinite,
               (-180...180).contains(longitude), latitude.isFinite, (-89.999...89.999).contains(latitude),
               (0...39).contains(houseSystem) else { throw AstrologError.invalidInput }
-        let leap = year % 4 == 0 && (year <= 1582 || year % 100 != 0 || year % 400 == 0)
-        let days = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31]
-        guard day <= days[month - 1] else { throw AstrologError.invalidInput }
+        guard day <= daysInMonth else { throw AstrologError.invalidInput }
     }
 }
 

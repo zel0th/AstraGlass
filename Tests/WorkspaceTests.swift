@@ -209,6 +209,33 @@ struct WorkspaceTests {
             try require(importedModel.savedCharts.count == 1 && importedModel.databaseNotice != nil, "Repeat import reports outcome without duplicates")
             checks.append("Whole database import/export, refreshed list, imported chart calculation and duplicate-free reimport")
 
+            // Loading B in the editor while A is open must update B, not A.
+            let originalRecord = dbModel.savedCharts[0]
+            dbModel.creatingChart = true
+            var anotherChart = savedSecondary; anotherChart.title = "Карта Б"
+            anotherChart.input.hour = 23; anotherChart.input.minute = 47
+            try dbModel.commitEditorChart(anotherChart, secondary: false)
+            let anotherID = dbModel.currentChartID!
+            dbModel.openStoredChart(originalRecord)
+            dbModel.creatingChart = false
+            var loadedEdit = anotherChart; loadedEdit.title = "Карта Б после редактора"
+            try dbModel.commitEditorChart(loadedEdit, secondary: false, loadedChartID: anotherID)
+            try require(dbModel.savedCharts.count == 2 && dbModel.currentChartID == anotherID
+                        && dbModel.input == loadedEdit.input && dbModel.title == loadedEdit.title,
+                        "Apply must open and update the explicitly loaded record without duplicates")
+            try require(dbModel.savedCharts.first(where: { $0.id == originalRecord.id }) == originalRecord,
+                        "Loading B must never overwrite previously open A")
+            let primaryBeforeSecondaryLoad = dbModel.input
+            dbModel.creatingChart = true
+            try dbModel.commitEditorChart(originalRecord.chart, secondary: true, loadedChartID: originalRecord.id)
+            try require(dbModel.input == primaryBeforeSecondaryLoad && dbModel.secondaryInput == originalRecord.chart.input
+                        && dbModel.savedCharts.count == 2, "Loaded saved record also works in the second-chart editor")
+            let exactConjunction = ChartAspect(first: 1, second: 3, kind: 1, angle: 0, orb: 0)
+            dbModel.selectAspect(exactConjunction)
+            try require(dbModel.selectedAspect == exactConjunction && dbModel.showInspector,
+                        "Conjunction selection must open its aspect inspector")
+            checks.append("Editor library load preserves record identity, avoids overwriting another chart, supports second chart; conjunction inspector selection")
+
             let result: [String: Any] = ["passed": checks.count, "failed": 0, "checks": checks,
                                          "timestamp": ISO8601DateFormatter().string(from: Date())]
             let data = try JSONSerialization.data(withJSONObject: result, options: [.prettyPrinted, .sortedKeys])

@@ -1,0 +1,44 @@
+{
+  "version": "0.3.3",
+  "platform": "macOS 27.2 arm64",
+  "checks": {
+    "adHocSignatures": true,
+    "readonlyDMGMounts": true,
+    "embeddedAstrolog": true,
+    "relocatedNatalSynastryGraphics": true,
+    "txt3Absent": true,
+    "publicCorpusAbsent": true,
+    "personalPodvodny": true,
+    "conjunctionSelectionUI": true,
+    "houseTintsUI": true,
+    "leapFebruaryUI": true,
+    "hourDropdownManualMinutesUI": true,
+    "savedChartSearchLoadCancelUI": true,
+    "coreGroups": 18,
+    "atlasChecks": 27,
+    "workspaceGroups": 14,
+    "pdfPages": 18
+  },
+  "assets": [
+    {
+      "name": "AstraGlass-0.3.3-macOS-arm64.dmg",
+      "size": 4442994,
+      "sha256": "dc752e27fb1ccb9d896f1c62c729f68c7295692041665b86fd834ace55b1f8f9"
+    },
+    {
+      "name": "AstraGlass-0.3.3-macOS-arm64.zip",
+      "size": 4110382,
+      "sha256": "5ce6d4bfd09a870cf2708438b990d85fe383580cebc03ed563dbd13ea17fc76f"
+    },
+    {
+      "name": "AstraGlass-0.3.3-macOS-arm64-personal.dmg",
+      "size": 6148739,
+      "sha256": "d5a9f19f7bcd013c65eaf1c76e8fa5fd61cad864f86fa51856bec16d2e451892"
+    },
+    {
+      "name": "AstraGlass-0.3.3-macOS-arm64-personal.zip",
+      "size": 5284011,
+      "sha256": "f63735aae8a1c5126696465800c0b3b607eb6b1fecfdb391941e53e34f2060f3"
+    }
+  ]
+}

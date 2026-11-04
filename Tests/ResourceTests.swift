@@ -18,6 +18,47 @@ struct ResourceTests {
         precondition(AstroStyle.objectColor(1) == Color.red && AstroStyle.objectColor(5) == Color.red)
         precondition(AstroStyle.objectColor(4) == Color.green && AstroStyle.objectColor(2) == Color.blue)
         for id in ChartPreferences.objectIDs { precondition(AstroStyle.objectColor(id) != Color.secondary) }
+        precondition(AstroStyle.aspectColor(0) == .blue && AstroStyle.aspectColor(90) == .red && AstroStyle.aspectColor(120) == .green)
+        // A stellium with all longitudes identical must still expose each pair.
+        let positions = Dictionary(uniqueKeysWithValues: (1...5).map { id in
+            (id, PlanetPosition(id: id, longitude: 359, latitude: 0, speed: 1, house: 1))
+        })
+        let conjunctions = (1...4).flatMap { first in ((first + 1)...5).map { second in
+            ChartAspect(first: first, second: second, kind: 1, angle: 0, orb: 0)
+        } }
+        let center = CGPoint(x: 300, y: 300)
+        for radius in [CGFloat(210), 262, 500] {
+            let markers = ChartWheelGeometry.conjunctionMarkers(aspects: conjunctions, positions: positions, asc: 0, radius: radius, center: center)
+            precondition(markers.count == 10)
+            for (id, location) in markers {
+                precondition(hypot(location.x - center.x, location.y - center.y) <= radius * 0.50)
+                for (otherID, other) in markers where id != otherID {
+                    precondition(hypot(location.x - other.x, location.y - other.y) >= 28 * max(0.8, radius / 262) - 0.001)
+                }
+            }
+        }
+        let wrapMiddle = ChartWheelGeometry.midpoint(359, 1)
+        precondition(abs(wrapMiddle - 360) < 0.001, "Conjunction across Aries must not be placed opposite the planets")
+        for index in 0..<12 {
+            let start = Double(index * 30 + 350).truncatingRemainder(dividingBy: 360)
+            let end = (start + 30).truncatingRemainder(dividingBy: 360)
+            let sector = ChartWheelGeometry.houseSector(start: start, end: end, asc: 350, radius: 262, center: center)
+            precondition(sector.contains(ChartWheelGeometry.point(start + 15, asc: 350, radius: 262 * 0.7, center: center)))
+            precondition(!sector.contains(center))
+            precondition(!sector.contains(ChartWheelGeometry.point(start + 15, asc: 350, radius: 262 * 0.95, center: center)))
+            precondition(!sector.contains(ChartWheelGeometry.point(start + 35, asc: 350, radius: 262 * 0.7, center: center)))
+        }
+        var date = ChartInput(year: 2024, month: 1, day: 31, hour: 23, minute: 59)
+        date.setCalendarField(\.month, to: 2)
+        precondition(date.day == 29 && date.hour == 23 && date.minute == 59)
+        date.setCalendarField(\.year, to: 2025)
+        precondition(date.day == 28)
+        for (year, days) in [(1900, 28), (2000, 29), (1500, 29)] {
+            date.setCalendarField(\.year, to: year)
+            precondition(date.daysInMonth == days)
+        }
+        date.month = 4; date.day = 31
+        precondition((try? date.validate()) == nil, "Imported invalid dates must be rejected, not silently clamped")
         precondition(InterpretationPack(rawValue: "txt3") == nil, "Retired collection must not be selectable")
         for id in 0..<40 { precondition(!houseSystemDescription(id).isEmpty) }
         let corpusURL = root.appendingPathComponent("Resources/interpretations.json")
@@ -28,6 +69,6 @@ struct ResourceTests {
             precondition(!library.forPlanet(id: 1, sign: 9, house: 10).isEmpty)
             print("Podvodny: 823 sections / 4 sources; retired collection unavailable")
         }
-        print("Resources: bundled font, all planet/sign/aspect glyphs, traditional Pluto, 40 house descriptions verified")
+        print("Resources: bundled glyphs, object/aspect colors, 10 separate conjunction targets, 12 house sectors, calendar transitions, 40 house descriptions verified")
     }
 }

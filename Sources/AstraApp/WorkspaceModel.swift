@@ -205,8 +205,10 @@ final class WorkspaceModel: ObservableObject {
         } catch { errorMessage = error.localizedDescription }
     }
 
-    func commitEditorChart(_ chart: SavedChart, secondary: Bool) throws {
-        let id = secondary ? secondaryChartID : (creatingChart ? nil : currentChartID)
+    func commitEditorChart(_ chart: SavedChart, secondary: Bool, loadedChartID: UUID? = nil) throws {
+        // Loading in the editor is a draft operation. Apply updates that record,
+        // never the unrelated chart that happened to be open before the editor.
+        let id = loadedChartID ?? (secondary ? secondaryChartID : (creatingChart ? nil : currentChartID))
         let item = try chartDatabase.save(chart, id: id)
         try applyChart(chart, secondary: secondary)
         if secondary { secondaryChartID = item.id } else { currentChartID = item.id; section = .chart }
