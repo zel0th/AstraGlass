@@ -1,12 +1,11 @@
 import Foundation
 
 public enum InterpretationPack: String, CaseIterable, Identifiable, Sendable {
-    case podvodny, txt3, custom
+    case podvodny, custom
     public var id: String { rawValue }
     public var title: String {
         switch self {
         case .podvodny: return L10n.text("Подводный · Общая астрология", "Podvodny · General Astrology")
-        case .txt3: return L10n.text("Сборник астрологических трактовок", "Astrological interpretation collection")
         case .custom: return L10n.text("Импортированная библиотека", "Imported library")
         }
     }
@@ -15,7 +14,6 @@ public enum InterpretationPack: String, CaseIterable, Identifiable, Sendable {
     public var url: URL? {
         switch self {
         case .podvodny: return Bundle.main.url(forResource: "interpretations", withExtension: "json")
-        case .txt3: return Bundle.main.url(forResource: "interpretations-txt3", withExtension: "json")
         case .custom: return FileManager.default.fileExists(atPath: InterpretationLibrary.userCorpusURL.path) ? InterpretationLibrary.userCorpusURL : nil
         }
     }

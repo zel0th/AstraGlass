@@ -1,74 +1,60 @@
 # AstraGlass — continuation checkpoint
 
-Updated: 4 November 2026 (Moscow). Version: **0.3.1**.
+Updated: 5 November 2026 (Moscow). Version **0.3.2**.
 
 ## Repository and authorization
-- Continue `Share/Projects/AstraGlass`, not the older AstrologMac project.
+- Continue this repository, not the old AstrologMac project.
 - Public repository: https://github.com/zel0th/AstraGlass
-- The user explicitly requested full source publication and compiled app/DMG on GitHub in this session. This resolves the earlier publication-approval blocker.
-- Recovered the latest 0.2.0 archive; previous local 0.1.1 modified files were backed up under /tmp/AstraGlass-before-0.2.0.
-- Existing GitHub initial README/LICENSE history is retained as the parent of this source import.
+- User authorized full source and compiled public app/DMG publication; personal author texts stay private.
+- No subagents unless explicitly requested. Keep this file below 100 lines.
 
-## Native validation completed
-- macOS 27.2 (26B123), Apple silicon, Swift 6.4.2; native app compiles and launches.
-- 17 core groups, 27 atlas checks (33,702 cities), 10 workspace groups pass.
-- Relocated bundle: natal, synastry, graphics pass from Helpers and legacy Resources/Engine paths.
-- Six engine-preference groups pass, including all 24 aspect switches and 11 graphics modes.
-- 299 localization keys match. Full manual English UI walkthrough remains unverified.
-- PDFKit: 18 A4 pages, all 45 synthetic paragraphs and final Cyrillic marker, attribution and deduplication pass. Pages 1/2/3/18 rendered and inspected.
-- Actual GUI: chart calculation and all three settings tabs inspected.
-- New calculation benchmark: 100 charts, 3.653 s, mean 36.53 ms. See PERFORMANCE.md.
-- New GUI profile is exploratory, not controlled idle: 2.618% one-core CPU, max sampled RSS 182.28 MiB. Do not compare directly with old 0.1.1 idle/interaction records.
+## Current implementation
+- Native macOS 27 SwiftUI app; Astrolog 8.0 in Contents/Helpers with runtime data and licenses.
+- Offline atlas: 33,702 cities, filtering from first character, Russian aliases, historical UTC/DST.
+- Bundled astrology font including traditional Pluto, explicit object colors (Sun/Mars red), 40 house-system explanations.
+- Settings for language, objects/aspects, appearance and installed interpretation collections.
+- Versioned atomic JSON chart database with backup, autosave on Apply, reopen/edit/second-chart/delete.
+- Local Podvodny corpus: 823 sections / 4 documents. Russian-only lookup/search/PDF; absent custom corpus hidden.
 
-## Distribution milestone
-- Packaging emits public or personal DMG and ZIP with SHA-256 sidecars.
-- Astrolog is inside `Contents/Helpers/astrolog`; runtime data, font and licenses are bundled. No separate Astrolog/Homebrew install.
-- Both binaries target macOS 27.0 arm64. Engine build cache includes platform flags.
-- DMG validation mounts read-only, verifies signature and Applications link, then tests relocated calculations/graphics.
-- Public startup treats absent private books as the expected empty library; corrupt imports still report errors.
-- Source and releases must exclude PrivateCorpus, interpretations.json, personal charts and personal packages.
-- Full source published to main. Clean Git archive rebuilt successfully; DMG and ZIP passed all packaging checks.
-- Release: https://github.com/zel0th/AstraGlass/releases/tag/v0.2.0 (DMG, ZIP, full source archive and SHA-256).
-- Distribution evidence: docs/validation/distribution.json; binary dependencies are system-only.
-- hdiutil requires the native runtime in this environment; the restricted shell cannot configure a disk-image device. Final native-runtime packaging exited 0.
+## 0.3.2 requested changes
+- ChartDashboardLayout measures actual header/footer and fills remaining viewport height; no 580-point cap.
+- Circle and glyphs scale together; Sun/Moon/ASC strip stays at bottom as window grows; short windows scroll.
+- Inspector default 800 points, resizable 360–1200; stable ZStack detail container preserves width across sections.
+- Whole database import/export in My Charts and Chart menu; UUID merge, newer revision wins, equal date keeps local.
+- Validate entire incoming file before writing; repeat imports are no-ops; preserve local-only records and backup.
+- Txt3 removed from selectable packs and build resources. Old persisted txt3 selection falls back to Podvodny.
+- Original Txt3 archive/index retained only in PrivateCorpus for future user cleanup; importer kept as preparation tool.
+- Build uses explicit Podvodny whitelist; package/bundle validators reject retired interpretations-txt3.json.
+
+## Validation this milestone
+- Database CRUD/backup, full JSON round trip, repeat import, revision merge, local-only preservation, four invalid imports, empty export passed.
+- Workspace: 13 groups passed with real engine, including imported-chart recalculation.
+- Resources: font/glyphs/colors, house descriptions and Podvodny 823/4 passed.
+- PDF: 18 A4 pages, all 45 synthetic paragraphs and final Cyrillic marker, attribution/deduplication passed.
+- Localization: 302 keys match, no missing static labels.
+- GUI: tall/short windows show proportional chart and moving lower strip; exported/reimported database reports 0 added / 0 updated / 1 unchanged.
+- Final GUI verified: inspector retains 800-point width when switching Chart → My Charts → Chart; tall/short layouts confirmed.
+- Core 18 groups and atlas 27 checks passed. Both DMG/ZIP packages passed signatures, readonly mounts and relocated engine checks.
+- Public package has no private corpus; personal package has Podvodny only; Txt3 absent in both.
+- Release URL: https://github.com/zel0th/AstraGlass/releases/tag/v0.3.2
+- Personal DMG saved for private delivery; release evidence: docs/validation/distribution-0.3.2.json.
 
 ## Reproduce
 ```sh
 bash scripts/test.sh
-bash scripts/test-bundle-engine.sh
+bash scripts/test-database.sh
 bash scripts/test-workspace.sh
+bash scripts/test-resources.sh
 bash scripts/test-pdf.sh
 python3 scripts/check-localizations.py
-python3 scripts/test-engine-preferences.py
-python3 scripts/benchmark.py
 bash scripts/package.sh --public
+bash scripts/package.sh --with-corpus
 ```
 
-## Product boundaries
-- No full Astrolog UI parity; see FEATURES.md.
-- Charon and some small bodies need optional ephemerides; unavailable positions are not fabricated.
-- Native progressions, animation and Astrolog .as document import remain future work.
-- Ad-hoc signing only; Developer ID and notarization are not configured.
-- Keep this checkpoint under 100 lines and preserve evidence between continuations.
-
-## 0.3.0 feature milestone (current)
-- Added bundled Astronomicon-derived Unicode font, including traditional Pluto. All configured glyphs verified with CoreText.
-- City popover filters from first character; keyboard selection and actual Helsinki/time-zone update verified. Row identity regression fixed.
-- Two personal bundled corpora: Podvodny 823 sections / 4 sources; Txt3 27,349 sections / 300 sources, 7,887 natal bindings. Settings selection persists.
-- Txt3 importer preserves full source text and section codes; unsupported/non-natal sections stay searchable without false natal bindings.
-- Added 40 house-system explanations and tropical/sidereal help.
-- Added atomic JSON database with backup, autosave on Apply, update, search, reopen, second-chart opening and deletion. GUI saved/reopened a clearly named Helsinki demonstration chart.
-- Current checks: core 17, atlas 27, workspace 11, database 7, Txt3 importer 17; resource/font suite passed. PDF 18 pages with all 45 synthetic paragraphs passed. 302 locale keys match.
-- Personal runtime with Txt3 was observed at 419.91 MiB RSS and ps 0.0% CPU after interaction; this is one sample, not a controlled memory/CPU benchmark. Corpus load in native resource harness: 3.013 s.
-- Personal and public DMG/ZIP completed; signatures, readonly DMG mounts and relocated natal/synastry/graphics passed. Public packages contain no private corpora. Native runtime is required for hdiutil.
-- Personal DMG saved for delivery; release URL: https://github.com/zel0th/AstraGlass/releases/tag/v0.3.0. Code commit: 41b7c5c. Distribution evidence: docs/validation/distribution-0.3.0.json.
-- Additional tests: bash scripts/test-database.sh; bash scripts/test-resources.sh.
-
-## 0.3.1 fixes
-- Missing custom corpus no longer appears in the picker; stale selections preserve the existing library without an error.
-- Txt3 display name is now «Сборник астрологических трактовок», retaining the persisted enum ID.
-- Russian-language records only across chart lookups/search/PDF: 22,422 records / 244 sources from the supplied collection. Original indexes unchanged. English-only imports rejected.
-- Explicit object palette in chart, table, inspector, settings and native PDF/PNG; Sun and Mars red, selection retains object color.
-- Tests passed: core 18, atlas 27, workspace 12, resource/font/language/palette checks. GUI verified two installed choices and the user's Moon–Saturn opposition example without English passages.
-- Both 0.3.1 DMG/ZIP packages passed signature, mount and relocated-engine checks. Personal archives retain both original corpora; public packages contain none.
-- PDF color cover visually verified. Release URL: https://github.com/zel0th/AstraGlass/releases/tag/v0.3.1.
+## Distribution and boundaries
+- Public source/release assets exclude PrivateCorpus, interpretations*.json, books, personal charts and personal packages.
+- Personal DMG includes Podvodny; deliver privately. Both packages embed Astrolog, no Homebrew required.
+- hdiutil needs native runtime here; restricted shell cannot configure disk-image device.
+- Ad-hoc signing only, no Developer ID/notarization. No full Astrolog parity; see FEATURES.md.
+- Some minor bodies require extra ephemerides; no fabricated positions. Progressions, animation and .as import remain future work.
+- Previous performance: 100 calculations, mean 36.53 ms; GUI 182.28 MiB/2.618% CPU exploratory profile, not controlled idle. See PERFORMANCE.md.

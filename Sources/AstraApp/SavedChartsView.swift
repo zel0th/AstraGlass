@@ -15,6 +15,14 @@ struct SavedChartsView: View {
                            title: L10n.text("Мои карты", "My charts"),
                            subtitle: L10n.text("Карты сохраняются автоматически после применения данных. Откройте любую для повторного расчёта.", "Charts are saved automatically when you apply their details. Open any chart to calculate it again."))
             HStack {
+                Button { model.importChartDatabase() } label: { Label(L10n.text("Импорт базы…", "Import database…"), systemImage: "square.and.arrow.down") }
+                Button { model.exportChartDatabase() } label: { Label(L10n.text("Экспорт базы…", "Export database…"), systemImage: "square.and.arrow.up") }
+                Spacer()
+            }
+            if let notice = model.databaseNotice {
+                Text(notice).font(.callout).foregroundStyle(.secondary)
+            }
+            HStack {
                 TextField(L10n.text("Поиск по названию или месту", "Search title or place"), text: $query).textFieldStyle(.roundedBorder)
                 Button(L10n.text("Новая карта", "New chart")) { model.newChart() }
                 Button { model.reloadCharts() } label: { Image(systemName: "arrow.clockwise") }

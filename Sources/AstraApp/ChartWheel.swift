@@ -34,7 +34,9 @@ struct ChartWheel: View {
     var body: some View {
         GeometryReader { geometry in
             let center = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
-            let radius = max(1, min(geometry.size.width, geometry.size.height) / 2 - 28)
+            let diameter = min(geometry.size.width, geometry.size.height)
+            let radius = max(1, diameter * 0.452)
+            let labelScale = max(0.8, radius / 262)
             let markers = markerPositions(radius: radius, center: center)
             ZStack {
                 Canvas { context, _ in
@@ -81,12 +83,12 @@ struct ChartWheel: View {
                 ForEach(visiblePlanets) { planet in
                     Button { select(planet.id) } label: {
                         VStack(spacing: 0) {
-                            Text(AstroStyle.glyph(planet.id)).font(AstroStyle.symbolFont(size: min(25, max(18, radius * 0.11))))
+                            Text(AstroStyle.glyph(planet.id)).font(AstroStyle.symbolFont(size: 25 * labelScale))
                             Text("\(Int(planet.degreeInSign))°" + (planet.isRetrograde ? " ℞" : ""))
-                                .font(.system(size: 8, weight: .medium))
+                                .font(.system(size: 8 * labelScale, weight: .medium))
                         }
                         .foregroundStyle(AstroStyle.objectColor(planet.id))
-                        .frame(width: 32, height: 38)
+                        .frame(width: 32 * labelScale, height: 38 * labelScale)
                         .background(planet.id == selectedPlanet ? AstroStyle.objectColor(planet.id).opacity(0.14) : Color.clear, in: RoundedRectangle(cornerRadius: 9))
                         .overlay(RoundedRectangle(cornerRadius: 9).strokeBorder(planet.id == selectedPlanet ? AstroStyle.objectColor(planet.id).opacity(0.7) : .clear, lineWidth: 1))
                         .contentShape(RoundedRectangle(cornerRadius: 9))
@@ -104,6 +106,7 @@ struct ChartWheel: View {
     }
 
     private func drawWheel(context: inout GraphicsContext, center: CGPoint, radius: CGFloat, markers: [Int: CGPoint]) {
+        let labelScale = max(0.8, radius / 262)
         let ink = Color.primary.opacity(colorScheme == .dark ? 0.22 : 0.14)
         for scale in [1.0, 0.85, 0.56] {
             let r = radius * scale
@@ -122,7 +125,7 @@ struct ChartWheel: View {
             context.stroke(path, with: .color(ink), lineWidth: index % 3 == 0 ? 1.3 : 0.7)
             let next = snapshot.houseCusps[(index + 1) % snapshot.houseCusps.count]
             let middle = cusp + ((next - cusp + 360).truncatingRemainder(dividingBy: 360)) / 2
-            context.draw(Text("\(index + 1)").font(.system(size: 9)).foregroundStyle(.secondary), at: point(middle, radius: radius * 0.58, center: center))
+            context.draw(Text("\(index + 1)").font(.system(size: 9 * labelScale)).foregroundStyle(.secondary), at: point(middle, radius: radius * 0.58, center: center))
         }
         for aspect in visibleAspects {
             guard let pair = aspectEndpoints(aspect, radius: radius, center: center) else { continue }
@@ -132,10 +135,10 @@ struct ChartWheel: View {
             context.stroke(path, with: .color(AstroStyle.aspectColor(aspect.angle).opacity(selected ? 1 : highlighted ? 0.65 : 0.20)), style: StrokeStyle(lineWidth: selected ? 2.8 : highlighted ? 1.3 : 0.8, dash: Int(aspect.angle) == 180 ? [4, 3] : []))
         }
         for (label, longitude) in [("ASC", asc), ("DSC", asc + 180)] {
-            context.draw(Text(label).font(.system(size: 9, weight: .bold)).foregroundStyle(AstroStyle.accent), at: point(longitude, radius: radius + 15, center: center))
+            context.draw(Text(label).font(.system(size: 9 * labelScale, weight: .bold)).foregroundStyle(AstroStyle.accent), at: point(longitude, radius: radius + 15 * labelScale, center: center))
         }
         if snapshot.houseCusps.indices.contains(9) {
-            context.draw(Text("MC").font(.system(size: 9, weight: .bold)).foregroundStyle(AstroStyle.accent), at: point(snapshot.houseCusps[9], radius: radius + 13, center: center))
+            context.draw(Text("MC").font(.system(size: 9 * labelScale, weight: .bold)).foregroundStyle(AstroStyle.accent), at: point(snapshot.houseCusps[9], radius: radius + 13 * labelScale, center: center))
         }
         for planet in visiblePlanets {
             let pointOnRing = point(planet.longitude, radius: radius * 0.85, center: center)
@@ -164,7 +167,7 @@ struct ChartWheel: View {
                 }
             }
             let chosen = candidates.first { candidate in
-                placed.values.allSatisfy { hypot($0.x - candidate.x, $0.y - candidate.y) >= 36 }
+                placed.values.allSatisfy { hypot($0.x - candidate.x, $0.y - candidate.y) >= 36 * max(0.8, radius / 262) }
             } ?? candidates.max { a, b in
                 minimumDistance(a, to: Array(placed.values)) < minimumDistance(b, to: Array(placed.values))
             } ?? point(planet.longitude, radius: radius * 0.76, center: center)

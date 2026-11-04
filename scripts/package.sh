@@ -22,6 +22,7 @@ import json, pathlib, sys
 app = pathlib.Path(sys.argv[1])
 resources = app / 'Contents' / 'Resources'
 corpus = resources / 'interpretations.json'
+assert not (resources / 'interpretations-txt3.json').exists(), 'Retired Txt3 corpus in package'
 if sys.argv[2] == '1':
     for included in resources.glob('interpretations*.json'):
         data = json.loads(included.read_text())

@@ -38,6 +38,7 @@ final class WorkspaceModel: ObservableObject {
     private let chartDatabase: ChartDatabase
     @Published var isCalculating = false
     @Published var errorMessage: String?
+    @Published var databaseNotice: String?
     @Published var report = ""
     @Published var reportTitle = L10n.text("Положения планет")
     @Published var reportIsRunning = false
@@ -230,6 +231,35 @@ final class WorkspaceModel: ObservableObject {
     }
 
     func revealChartDatabase() { NSWorkspace.shared.activateFileViewerSelecting([chartDatabase.url]) }
+
+    func importChartDatabase() {
+        let panel = NSOpenPanel()
+        panel.allowedContentTypes = [.json]; panel.allowsMultipleSelection = false
+        panel.title = L10n.text("Импортировать базу карт", "Import chart database")
+        panel.message = L10n.text("Карты будут объединены с текущей базой. Для совпадающих карт сохраняется более свежая запись.", "Charts will be merged with the current database. The newer revision of each matching chart is kept.")
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do { try importChartDatabase(from: url) }
+        catch { errorMessage = L10n.text("Не удалось импортировать базу карт: ", "Unable to import chart database: ") + error.localizedDescription }
+    }
+
+    func importChartDatabase(from url: URL) throws {
+        let result = try chartDatabase.importFile(at: url)
+        reloadCharts(); section = .savedCharts
+        databaseNotice = L10n.text("Добавлено: \(result.added). Обновлено: \(result.updated). Без изменений: \(result.unchanged).", "Added: \(result.added). Updated: \(result.updated). Unchanged: \(result.unchanged).")
+    }
+
+    func exportChartDatabase() {
+        let panel = NSSavePanel(); panel.allowedContentTypes = [.json]
+        panel.title = L10n.text("Экспортировать базу карт", "Export chart database")
+        panel.nameFieldStringValue = "AstraGlass-charts.json"
+        guard panel.runModal() == .OK, let url = panel.url else { return }
+        do {
+            try exportChartDatabase(to: url)
+            databaseNotice = L10n.text("База карт экспортирована.", "Chart database exported.")
+        } catch { errorMessage = L10n.text("Не удалось экспортировать базу карт: ", "Unable to export chart database: ") + error.localizedDescription }
+    }
+
+    func exportChartDatabase(to url: URL) throws { try chartDatabase.export(to: url) }
 
     func selectInterpretationPack(_ pack: InterpretationPack) {
         guard InterpretationPack.available.contains(pack) else { return }

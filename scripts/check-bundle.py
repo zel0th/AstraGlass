@@ -11,6 +11,7 @@ import tempfile
 app = Path(sys.argv[1]).resolve()
 resources = app / 'Contents/Resources'
 helper = app / 'Contents/Helpers/astrolog'
+assert not (resources / 'interpretations-txt3.json').exists(), 'Retired Txt3 corpus must not ship'
 assert helper.is_file() and os.access(helper, os.X_OK), 'Astrolog helper must be executable'
 assert os.access(app / 'Contents/MacOS/AstraGlass', os.X_OK), 'App must be executable'
 for name in ['Engine/atlas.as', 'Engine/timezone.as', 'Engine/astrolog.as',

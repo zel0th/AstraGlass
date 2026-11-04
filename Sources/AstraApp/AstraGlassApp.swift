@@ -27,6 +27,8 @@ struct AstraGlassApp: App {
             CommandMenu(L10n.text("Карта")) {
                 Button(L10n.text("Мои карты", "My charts")) { model.reloadCharts(); model.section = .savedCharts }
                 Button(L10n.text("Экспортировать карту в JSON…", "Export chart as JSON…")) { model.exportChart() }
+                Button(L10n.text("Импортировать базу карт…", "Import chart database…")) { model.importChartDatabase() }
+                Button(L10n.text("Экспортировать базу карт…", "Export chart database…")) { model.exportChartDatabase() }
                 Divider()
                 Button(L10n.text("Изменить данные…")) { model.edit() }.keyboardShortcut("e")
                 Button(L10n.text("Пересчитать")) { model.calculate() }.keyboardShortcut("r")
@@ -70,7 +72,7 @@ struct WorkspaceView: View {
                 }.padding(20).frame(maxWidth: .infinity, alignment: .leading)
             }.navigationSplitViewColumnWidth(min: 220, ideal: 280, max: 280)
         } detail: {
-            Group {
+            ZStack(alignment: .topLeading) {
                 switch model.section ?? .chart {
                 case .savedCharts: SavedChartsView(model: model)
                 case .chart: ChartDashboard(model: model)
@@ -85,7 +87,10 @@ struct WorkspaceView: View {
             }
             .frame(minWidth: 500, minHeight: 600)
             .background(Color(nsColor: .windowBackgroundColor))
-            .inspector(isPresented: $model.showInspector) { InterpretationInspector(model: model).inspectorColumnWidth(min: 320, ideal: 580, max: 580) }
+            .inspector(isPresented: $model.showInspector) {
+                InterpretationInspector(model: model)
+                    .inspectorColumnWidth(min: 360, ideal: 800, max: 1200)
+            }
             .navigationTitle(model.title)
             .navigationSubtitle(model.place + " · " + model.dateSummary)
             .toolbar {
@@ -103,14 +108,17 @@ struct WorkspaceView: View {
         .sheet(isPresented: $model.showEditor) { ChartEditor(model: model, secondary: model.editingSecondary) }
         .alert("AstraGlass", isPresented: Binding(get: { model.errorMessage != nil }, set: { if !$0 { model.errorMessage = nil } })) { Button(L10n.text("Понятно")) { model.errorMessage = nil } } message: { Text(model.errorMessage ?? "") }
         .task { if model.snapshot == nil { model.calculate() } }
+        .frame(minWidth: 1100, minHeight: 600)
     }
 }
 
 struct ChartDashboard: View {
     @ObservedObject var model: WorkspaceModel
     var body: some View {
+        GeometryReader { viewport in
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            ChartDashboardLayout(viewportHeight: max(0, viewport.size.height - 56)) {
+                VStack(alignment: .leading, spacing: 20) {
                 HStack(alignment: .top) {
                     SectionHeading(eyebrow: L10n.text("Натальная карта"), title: L10n.text("Геометрия неба"), subtitle: model.calculationSummary)
                     Spacer()
@@ -118,10 +126,10 @@ struct ChartDashboard: View {
                     else { Button { model.section = .planets } label: { Image(systemName: "list.bullet").padding(4) }.buttonStyle(.glass).help(L10n.text("Таблица положений")) }
                 }
                 if model.currentChartID == nil && model.input == ChartInput() && (model.title.hasPrefix("Пример") || model.title.hasPrefix("Example")) { Text(L10n.text("Демонстрационная карта: 1 января 2000, 12:00, Москва. Измените данные для своей карты.")).font(.caption).foregroundStyle(.secondary) }
+                }
                 if let snapshot = model.displaySnapshot {
                     ChartWheel(snapshot: snapshot, selectedPlanet: model.selectedPlanet, select: model.selectPlanet, selectSign: model.selectSign, selectAspect: model.selectAspect, selectedAspect: model.selectedAspect, selectedSign: model.selectedSign)
-                        .frame(minHeight: 440, idealHeight: 520, maxHeight: 580)
-                        .aspectRatio(1, contentMode: .fit).frame(maxWidth: .infinity)
+                    VStack(alignment: .leading, spacing: 20) {
                     HStack(spacing: 0) {
                         chartMetric(L10n.text("СОЛНЦЕ"), value: signSummary(snapshot, planet: 1))
                         Divider().frame(height: 35)
@@ -133,8 +141,13 @@ struct ChartDashboard: View {
                         Text(L10n.text("Недоступны без дополнительных эфемерид: ", "Additional ephemerides required: ") + model.unavailableObjectNames.joined(separator: ", ")).font(.caption).foregroundStyle(.secondary)
                     }
                     HStack { Text(L10n.text("Выберите планету, знак или линию аспекта для трактовки")); Spacer(); Text(String(format: L10n.text("Расчёт %.0f мс"), model.lastCalculation * 1000)) }.font(.caption2).foregroundStyle(.tertiary)
-                } else { EmptyPanel(title: model.isCalculating ? L10n.text("Рассчитываем карту") : L10n.text("Карта не рассчитана"), description: L10n.text("Укажите дату, местное время и координаты в данных карты.")).frame(height: 440) }
+                    }
+                } else {
+                    EmptyPanel(title: model.isCalculating ? L10n.text("Рассчитываем карту") : L10n.text("Карта не рассчитана"), description: L10n.text("Укажите дату, местное время и координаты в данных карты."))
+                    Color.clear.frame(height: 0)
+                }
             }.padding(28)
+        }
         }
     }
     private func chartMetric(_ label: String, value: String) -> some View { VStack(spacing: 7) { Text(label).font(.system(size: 9, weight: .medium)).tracking(1.3).foregroundStyle(.secondary); Text(value).font(.system(size: 17, weight: .medium, design: .rounded)) }.frame(maxWidth: .infinity) }

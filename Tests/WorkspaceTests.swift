@@ -196,6 +196,19 @@ struct WorkspaceTests {
             try require(reopenedModel.secondaryInput == edited.input, "Saved chart can be opened as the second chart")
             checks.append("JSON database autosave, update without duplicates, relaunch, recalculation and second-chart reopen")
 
+            let exportedDB = dbFolder.appendingPathComponent("export.json")
+            try dbModel.exportChartDatabase(to: exportedDB)
+            let importedModel = WorkspaceModel(engine: engine, databaseURL: dbFolder.appendingPathComponent("import/charts.json"))
+            try importedModel.importChartDatabase(from: exportedDB)
+            try require(importedModel.savedCharts == dbModel.savedCharts && importedModel.section == .savedCharts,
+                        "Database import refreshes saved list with stable record identities")
+            importedModel.openStoredChart(importedModel.savedCharts[0])
+            try await waitUntilFinished { importedModel.isCalculating }
+            try require(importedModel.snapshot != nil && importedModel.input == edited.input, "Imported chart reopens and calculates")
+            try importedModel.importChartDatabase(from: exportedDB)
+            try require(importedModel.savedCharts.count == 1 && importedModel.databaseNotice != nil, "Repeat import reports outcome without duplicates")
+            checks.append("Whole database import/export, refreshed list, imported chart calculation and duplicate-free reimport")
+
             let result: [String: Any] = ["passed": checks.count, "failed": 0, "checks": checks,
                                          "timestamp": ISO8601DateFormatter().string(from: Date())]
             let data = try JSONSerialization.data(withJSONObject: result, options: [.prettyPrinted, .sortedKeys])

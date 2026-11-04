@@ -1,0 +1,38 @@
+{
+  "version": "0.3.2",
+  "platform": "macOS 27.2 arm64",
+  "checks": {
+    "adHocSignatures": true,
+    "readonlyDMGMounts": true,
+    "embeddedAstrolog": true,
+    "relocatedNatalSynastryGraphics": true,
+    "txt3Absent": true,
+    "publicCorpusAbsent": true,
+    "personalPodvodny": true,
+    "databaseImportExportUI": true,
+    "stableInspectorWidth": true,
+    "responsiveChartTallShort": true
+  },
+  "assets": [
+    {
+      "name": "AstraGlass-0.3.2-macOS-arm64.dmg",
+      "size": 4391103,
+      "sha256": "fd88b9798c8a80c651c41708f9d6ffdee69eadeef79d13cd9bf9754cfd0fc276"
+    },
+    {
+      "name": "AstraGlass-0.3.2-macOS-arm64.zip",
+      "size": 4065860,
+      "sha256": "8d8429d5c7830b4fa3621f8b335d597628cd15be3cb848a1c0d0bd6e9e44243d"
+    },
+    {
+      "name": "AstraGlass-0.3.2-macOS-arm64-personal.dmg",
+      "size": 6100062,
+      "sha256": "98a1767e3eb5c164d7e7d63efa33e8e5aadb0b67b875dacf0575dc3317559b74"
+    },
+    {
+      "name": "AstraGlass-0.3.2-macOS-arm64-personal.zip",
+      "size": 5239490,
+      "sha256": "695a49b2674981bb7fbeacd5d3bc2374f02657fbbe41a4278626ac54557fb2d1"
+    }
+  ]
+}

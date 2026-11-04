@@ -35,9 +35,10 @@ cp "$ROOT/Upstream/Astrolog/astrolog.htm" "$APP/Contents/Resources/Astrolog-Manu
 # Always remove stale private collections before selecting this build's resources.
 rm -f "$APP/Contents/Resources"/interpretations*.json
 if [[ "$INCLUDE_CORPUS" == 1 ]]; then
-  for CORPUS in "$ROOT/Resources"/interpretations*.json; do
-    [[ ! -f "$CORPUS" ]] || cp "$CORPUS" "$APP/Contents/Resources/"
-  done
+  # Only the approved Podvodny collection ships in this version. Retired
+  # indexes (including Txt3) must not reappear through a wildcard copy.
+  CORPUS="$ROOT/Resources/interpretations.json"
+  [[ ! -f "$CORPUS" ]] || cp "$CORPUS" "$APP/Contents/Resources/"
 fi
 rm -f "$APP/Contents/Resources/profile-request.json"
 if [[ ! -f "$ROOT/Resources/AppIcon.icns" ]]; then bash "$ROOT/scripts/make-icon.sh"; fi

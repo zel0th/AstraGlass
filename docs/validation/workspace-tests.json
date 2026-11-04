@@ -11,9 +11,10 @@
     "Graphic captions capture both titles and are invalidated when either changes",
     "Settings invalidate stale results, filter the actual engine snapshot and persist",
     "Unavailable interpretation collections are absent from the picker and stale selections are harmless",
-    "JSON database autosave, update without duplicates, relaunch, recalculation and second-chart reopen"
+    "JSON database autosave, update without duplicates, relaunch, recalculation and second-chart reopen",
+    "Whole database import\/export, refreshed list, imported chart calculation and duplicate-free reimport"
   ],
   "failed" : 0,
-  "passed" : 12,
-  "timestamp" : "2026-11-04T20:28:47Z"
+  "passed" : 13,
+  "timestamp" : "2026-11-04T20:59:32Z"
 }
