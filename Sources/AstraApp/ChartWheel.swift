@@ -85,9 +85,10 @@ struct ChartWheel: View {
                             Text("\(Int(planet.degreeInSign))°" + (planet.isRetrograde ? " ℞" : ""))
                                 .font(.system(size: 8, weight: .medium))
                         }
-                        .foregroundStyle(planet.id == selectedPlanet ? AstroStyle.accent : Color.primary)
+                        .foregroundStyle(AstroStyle.objectColor(planet.id))
                         .frame(width: 32, height: 38)
-                        .background(planet.id == selectedPlanet ? AstroStyle.accent.opacity(0.12) : Color.clear, in: RoundedRectangle(cornerRadius: 9))
+                        .background(planet.id == selectedPlanet ? AstroStyle.objectColor(planet.id).opacity(0.14) : Color.clear, in: RoundedRectangle(cornerRadius: 9))
+                        .overlay(RoundedRectangle(cornerRadius: 9).strokeBorder(planet.id == selectedPlanet ? AstroStyle.objectColor(planet.id).opacity(0.7) : .clear, lineWidth: 1))
                         .contentShape(RoundedRectangle(cornerRadius: 9))
                     }
                     .buttonStyle(.plain)
@@ -140,9 +141,9 @@ struct ChartWheel: View {
             let pointOnRing = point(planet.longitude, radius: radius * 0.85, center: center)
             if let marker = markers[planet.id] {
                 var leader = Path(); leader.move(to: pointOnRing); leader.addLine(to: marker)
-                context.stroke(leader, with: .color(ink), lineWidth: 0.6)
+                context.stroke(leader, with: .color(AstroStyle.objectColor(planet.id).opacity(0.4)), lineWidth: 0.6)
             }
-            context.fill(Path(ellipseIn: CGRect(x: pointOnRing.x-2, y: pointOnRing.y-2, width: 4, height: 4)), with: .color(planet.id == selectedPlanet ? AstroStyle.accent : .secondary))
+            context.fill(Path(ellipseIn: CGRect(x: pointOnRing.x-2, y: pointOnRing.y-2, width: 4, height: 4)), with: .color(AstroStyle.objectColor(planet.id)))
         }
     }
 

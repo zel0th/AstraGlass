@@ -163,6 +163,18 @@ struct WorkspaceTests {
             try require(restoredPreferences == model.preferences, "Preferences must survive relaunch")
             checks.append("Settings invalidate stale results, filter the actual engine snapshot and persist")
 
+            let originalPack = model.interpretationPack
+            let originalLibraryCount = model.library?.records.count
+            model.errorMessage = nil
+            if let unavailable = InterpretationPack.allCases.first(where: { $0.url == nil }) {
+                try require(!InterpretationPack.available.contains(unavailable), "Missing collection must not be selectable")
+                model.selectInterpretationPack(unavailable)
+                try require(model.errorMessage == nil && model.interpretationPack == originalPack
+                            && model.library?.records.count == originalLibraryCount,
+                            "A stale selection must preserve the current collection without an alert")
+            }
+            checks.append("Unavailable interpretation collections are absent from the picker and stale selections are harmless")
+
             let dbFolder = FileManager.default.temporaryDirectory.appendingPathComponent("AstraGlass-workspace-db-" + UUID().uuidString)
             defer { try? FileManager.default.removeItem(at: dbFolder) }
             let dbURL = dbFolder.appendingPathComponent("charts.json")

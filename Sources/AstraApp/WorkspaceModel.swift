@@ -78,7 +78,7 @@ final class WorkspaceModel: ObservableObject {
         self.engine = engine
         self.chartDatabase = ChartDatabase(url: databaseURL)
         let preferred = InterpretationPack(rawValue: UserDefaults.standard.string(forKey: "interpretationPack") ?? "podvodny") ?? .podvodny
-        interpretationPack = preferred.url != nil ? preferred : (InterpretationPack.podvodny.url != nil ? .podvodny : .custom)
+        interpretationPack = InterpretationPack.available.contains(preferred) ? preferred : (InterpretationPack.available.first ?? .podvodny)
         do { library = try InterpretationLibrary.load(interpretationPack) }
         catch InterpretationError.missingCorpus {
             // The public distribution intentionally starts without private books.
@@ -232,6 +232,7 @@ final class WorkspaceModel: ObservableObject {
     func revealChartDatabase() { NSWorkspace.shared.activateFileViewerSelecting([chartDatabase.url]) }
 
     func selectInterpretationPack(_ pack: InterpretationPack) {
+        guard InterpretationPack.available.contains(pack) else { return }
         do {
             let loaded = try InterpretationLibrary.load(pack)
             library = loaded; interpretationPack = pack

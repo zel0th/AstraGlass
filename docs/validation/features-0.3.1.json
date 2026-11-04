@@ -1,0 +1,28 @@
+{
+  "version": "0.3.1",
+  "core_groups": 18,
+  "atlas_checks": 27,
+  "workspace_groups": 12,
+  "resource_checks": [
+    "All supported object colors assigned",
+    "Sun and Mars red",
+    "Venus green and Moon blue",
+    "Traditional Pluto glyph",
+    "Russian view: 22422 records from 244 sources",
+    "English phrase search empty",
+    "Moon-Saturn opposition contains Russian passages only",
+    "Missing collections absent; stale selection preserves state"
+  ],
+  "pdf": {
+    "pages": 18,
+    "preserved_test_paragraphs": 45,
+    "color_cover_visually_verified": true
+  },
+  "gui": [
+    "Two installed options; no missing custom entry",
+    "Renamed collection",
+    "Moon-Saturn opposition matches user case with Russian passages",
+    "Object colors visible and selected Sun remains red"
+  ],
+  "original_corpora_modified": false
+}

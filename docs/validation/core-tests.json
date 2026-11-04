@@ -16,11 +16,12 @@
     "All eleven Astrolog graphics presets produce decodable nonempty bitmaps",
     "Concurrent requests remain isolated",
     "Source provenance and complete principal planet\/sign and house\/sign corpus bindings",
-    "Cyrillic case-insensitive search and aspect endpoint lookup symmetry"
+    "Cyrillic case-insensitive search and aspect endpoint lookup symmetry",
+    "Russian-only interpretations, all lookup paths, search and rejection of English-only imports"
   ],
   "engine" : "Astrolog 8.00",
   "failed" : 0,
-  "passed" : 17,
+  "passed" : 18,
   "platform" : "Version 27.2 (Build 26B123)",
-  "timestamp" : "2026-11-04T20:04:27Z"
+  "timestamp" : "2026-11-04T20:28:37Z"
 }

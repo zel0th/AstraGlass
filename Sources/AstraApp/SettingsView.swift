@@ -39,14 +39,14 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text(L10n.text("Библиотека трактовок", "Interpretation library")).font(.headline)
                 Button(L10n.text("Импортировать библиотеку JSON…", "Import JSON library…")) { model.importLibrary() }
-                Picker(L10n.text("Набор текстов", "Text collection"), selection: Binding(get: { model.interpretationPack }, set: { model.selectInterpretationPack($0) })) {
-                    ForEach(InterpretationPack.allCases) { pack in
-                        Text(pack.title + (pack.url == nil ? L10n.text(" · не установлен", " · not installed") : "")).tag(pack).disabled(pack.url == nil)
+                if !InterpretationPack.available.isEmpty {
+                    Picker(L10n.text("Набор текстов", "Text collection"), selection: Binding(get: { model.interpretationPack }, set: { model.selectInterpretationPack($0) })) {
+                        ForEach(InterpretationPack.available) { pack in Text(pack.title).tag(pack) }
                     }
                 }
                 Text(L10n.text("\(model.library?.records.count ?? 0) разделов из \(model.library?.sources.count ?? 0) источников. Выбранный набор используется в трактовках карты, библиотеке и PDF.", "\(model.library?.records.count ?? 0) sections from \(model.library?.sources.count ?? 0) sources. The selected collection is used in chart interpretations, the library and PDF."))
                     .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-                Text(L10n.text("Авторские тексты сохраняются на языке оригинала. Язык интерфейса не переводит библиотеку и исходные отчёты Astrolog.", "Author texts stay in their original language. Interface language does not translate the library or Astrolog's original reports."))
+                Text(L10n.text("В трактовках, библиотеке и PDF показываются русскоязычные разделы. Свой набор появится в списке после успешного импорта.", "Interpretations, the library and PDF show Russian sections. Your own collection appears after a successful import."))
                     .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
@@ -60,7 +60,7 @@ struct SettingsView: View {
                 ForEach(ChartPreferences.objectIDs, id: \.self) { id in
                     Toggle(isOn: objectBinding(id)) {
                         HStack(spacing: 8) {
-                            Text(AstroStyle.glyph(id)).font(AstroStyle.symbolFont(size: 20)).lineLimit(1).minimumScaleFactor(0.65).frame(width: 28)
+                            Text(AstroStyle.glyph(id)).font(AstroStyle.symbolFont(size: 20)).lineLimit(1).minimumScaleFactor(0.65).frame(width: 28).foregroundStyle(AstroStyle.objectColor(id))
                             Text(AstroStyle.name(id))
                         }
                     }.toggleStyle(.checkbox)

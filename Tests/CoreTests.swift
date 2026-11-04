@@ -219,6 +219,39 @@ private func distance(_ a: Double, _ b: Double) -> Double {
             checked("Cyrillic case-insensitive search and aspect endpoint lookup symmetry")
         }
 
+        let languageFolder = FileManager.default.temporaryDirectory.appendingPathComponent("AstraGlass-language-" + UUID().uuidString)
+        try FileManager.default.createDirectory(at: languageFolder, withIntermediateDirectories: true)
+        defer { try? FileManager.default.removeItem(at: languageFolder) }
+        let fixtureURL = languageFolder.appendingPathComponent("fixture.json")
+        let source: [String: Any] = ["id":"fixture", "fileName":"fixture.txt", "title":"Проверка языка", "sha256":String(repeating:"0",count:64), "sectionCount":2]
+        let russian: [String: Any] = ["id":"ru", "title":"Русская трактовка", "originalTitle":"Русская трактовка", "category":"Аспекты",
+            "body":"Авторский русский текст сохраняется без изменений. Ссылка на объект ASC допустима.",
+            "source":"fixture.txt", "sourceTitle":"Проверка языка", "sourceSHA256":String(repeating:"0",count:64),
+            "paragraphStart":1,"paragraphEnd":2,"headingLevel":1,"breadcrumbs":[],"keywords":[],
+            "planetIDs":[2,7],"signIndices":[],"houseNumbers":[],"aspectAngle":180,
+            "bindings":["aspect-pair:180:2:7","planet-sign:1:9","house-sign:1:0","sign:0"]]
+        var english = russian; english["id"] = "en"; english["title"] = "Moon Opposition Saturn"
+        english["body"] = "ForeignOnlyPhrase. Your approach to discipline and responsibilities is described here."
+        func writeLanguageFixture(_ records: [[String: Any]]) throws {
+            try JSONSerialization.data(withJSONObject: ["schemaVersion":1,"sources":[source],"records":records]).write(to: fixtureURL)
+        }
+        try writeLanguageFixture([russian, english])
+        let russianLibrary = try InterpretationLibrary(url: fixtureURL)
+        try require(russianLibrary.records.map(\.id) == ["ru"] && russianLibrary.sources[0].sectionCount == 1,
+                    "Only Russian records and their source counts are exposed")
+        try require(russianLibrary.records[0].body == russian["body"] as? String, "Do not rewrite author text")
+        try require(russianLibrary.search("ForeignOnlyPhrase").isEmpty && russianLibrary.search("русский").count == 1,
+                    "English interpretations must not appear in library search")
+        try require(russianLibrary.forAspect(first:2,second:7,angle:180).map(\.id) == ["ru"]
+                    && russianLibrary.forPlanet(id:1,sign:9,house:1).map(\.id) == ["ru"]
+                    && russianLibrary.forSign(index:0).map(\.id) == ["ru"]
+                    && russianLibrary.forHouse(number:1,sign:0).map(\.id) == ["ru"],
+                    "Every chart/PDF lookup uses the same Russian-only library")
+        try writeLanguageFixture([english])
+        do { _ = try InterpretationLibrary(url: fixtureURL); throw TestFailure(description: "English-only corpus must not import") }
+        catch InterpretationError.invalidCorpus { }
+        checked("Russian-only interpretations, all lookup paths, search and rejection of English-only imports")
+
         let output: [String: Any] = ["passed": checks.count, "failed": 0, "checks": checks, "engine": chart.engine, "platform": ProcessInfo.processInfo.operatingSystemVersionString, "timestamp": ISO8601DateFormatter().string(from: Date())]
         print(String(decoding: try JSONSerialization.data(withJSONObject: output, options: [.prettyPrinted, .sortedKeys]), as: UTF8.self))
     }

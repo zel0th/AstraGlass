@@ -8,7 +8,7 @@ struct PlanetTableView: View {
             SectionHeading(eyebrow: L10n.text("Положения"), title: L10n.text("Планеты и точки"), subtitle: L10n.text("Эклиптическая долгота, движение и положение в домах"))
             if let snapshot = model.displaySnapshot {
                 Table(snapshot.positions, selection: Binding<Int?>(get: { model.selectedPlanet }, set: { if let id = $0 { model.selectPlanet(id) } })) {
-                    TableColumn(L10n.text("Объект")) { p in HStack(spacing: 12) { Text(AstroStyle.glyph(p.id)).font(AstroStyle.symbolFont(size: 24)).lineLimit(1).minimumScaleFactor(0.65).frame(width: 32).foregroundStyle(AstroStyle.accent); Text(AstroStyle.name(p.id)).fontWeight(.medium) } }.width(min: 140, ideal: 170)
+                    TableColumn(L10n.text("Объект")) { p in HStack(spacing: 12) { Text(AstroStyle.glyph(p.id)).font(AstroStyle.symbolFont(size: 24)).lineLimit(1).minimumScaleFactor(0.65).frame(width: 32).foregroundStyle(AstroStyle.objectColor(p.id)); Text(AstroStyle.name(p.id)).fontWeight(.medium) } }.width(min: 140, ideal: 170)
                     TableColumn(L10n.text("Знак")) { p in HStack { Text(AstroStyle.signGlyphs[p.sign]).font(AstroStyle.symbolFont(size: 16)).foregroundStyle(AstroStyle.elementColors[p.sign % 4]); Text(AstroStyle.signNames[p.sign]) } }.width(min: 100, ideal: 120)
                     TableColumn(L10n.text("Положение")) { p in Text(AstroStyle.position(p.longitude)).monospacedDigit() }.width(min: 75, ideal: 85)
                     TableColumn(L10n.text("Дом")) { p in Text("\(p.house)").monospacedDigit() }.width(40)
@@ -66,7 +66,7 @@ struct InterpretationInspector: View {
                     Text(record.title).font(.system(size: 23, weight: .medium, design: .serif))
                     Text(L10n.text(record.category)).font(.caption).foregroundStyle(.secondary)
                 } else if let p = model.selectedPosition {
-                    HStack(alignment: .center, spacing: 14) { Text(AstroStyle.glyph(p.id)).font(AstroStyle.symbolFont(size: 43)).foregroundStyle(AstroStyle.accent); VStack(alignment: .leading,spacing:5) { Text(AstroStyle.name(p.id)).font(.system(size: 24, weight: .medium, design: .serif)); Text("\(AstroStyle.signNames[p.sign]) · \(AstroStyle.position(p.longitude))").font(.subheadline).foregroundStyle(.secondary) } }
+                    HStack(alignment: .center, spacing: 14) { Text(AstroStyle.glyph(p.id)).font(AstroStyle.symbolFont(size: 43)).foregroundStyle(AstroStyle.objectColor(p.id)); VStack(alignment: .leading,spacing:5) { Text(AstroStyle.name(p.id)).font(.system(size: 24, weight: .medium, design: .serif)); Text("\(AstroStyle.signNames[p.sign]) · \(AstroStyle.position(p.longitude))").font(.subheadline).foregroundStyle(.secondary) } }
                     HStack { Label(L10n.text("\(p.house) дом", "House \(p.house)"),systemImage:"house"); if p.isRetrograde { Text(L10n.text("Ретроградная")) } }.font(.caption).foregroundStyle(.secondary)
                 }
             }.frame(maxWidth:.infinity,alignment:.leading).padding(23)

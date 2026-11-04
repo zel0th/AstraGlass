@@ -10,9 +10,10 @@
     "Failed replacement reports never expose previous content under a new title",
     "Graphic captions capture both titles and are invalidated when either changes",
     "Settings invalidate stale results, filter the actual engine snapshot and persist",
+    "Unavailable interpretation collections are absent from the picker and stale selections are harmless",
     "JSON database autosave, update without duplicates, relaunch, recalculation and second-chart reopen"
   ],
   "failed" : 0,
-  "passed" : 11,
-  "timestamp" : "2026-11-04T20:08:17Z"
+  "passed" : 12,
+  "timestamp" : "2026-11-04T20:28:47Z"
 }

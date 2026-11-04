@@ -6,10 +6,12 @@ public enum InterpretationPack: String, CaseIterable, Identifiable, Sendable {
     public var title: String {
         switch self {
         case .podvodny: return L10n.text("Подводный · Общая астрология", "Podvodny · General Astrology")
-        case .txt3: return L10n.text("Txt3 · сборник трактовок", "Txt3 · interpretation collection")
+        case .txt3: return L10n.text("Сборник астрологических трактовок", "Astrological interpretation collection")
         case .custom: return L10n.text("Импортированная библиотека", "Imported library")
         }
     }
+    /// Uninstalled collections must never become selectable menu entries.
+    public static var available: [InterpretationPack] { allCases.filter { $0.url != nil } }
     public var url: URL? {
         switch self {
         case .podvodny: return Bundle.main.url(forResource: "interpretations", withExtension: "json")
@@ -63,7 +65,7 @@ public enum InterpretationError: LocalizedError {
     public var errorDescription: String? {
         switch self {
         case .missingCorpus:
-            return L10n.text("Добавьте библиотеку текстов Подводного в формате interpretations.json. Индекс можно создать из ваших DOCX с помощью импортера проекта.", "Import a Podvodny interpretation library in interpretations.json format. Create the index from your own DOCX files using the project importer.")
+            return L10n.text("Этот набор текстов не установлен. Выберите доступный набор или импортируйте свою библиотеку в настройках.", "This collection is not installed. Choose an available collection or import your library in Settings.")
         case .invalidCorpus(let detail):
             return L10n.text("Не удалось открыть библиотеку трактовок: ", "Unable to open interpretation library: ") + detail
         }
@@ -104,15 +106,44 @@ public struct InterpretationLibrary: Sendable {
         guard Set(corpus.records.map(\.id)).count == corpus.records.count else {
             throw InterpretationError.invalidCorpus(L10n.text("Повторяющиеся идентификаторы разделов.", "Duplicate section identifiers."))
         }
-        self.records = corpus.records
-        self.sources = corpus.sources
+        // A multilingual archive remains unchanged on disk. Every public lookup,
+        // library search and PDF export uses the same Russian-language view.
+        let visibleRecords = corpus.records.filter { record in
+            Self.isRussianText(record.body) && record.title.unicodeScalars.contains {
+                (0x0410...0x044F).contains($0.value) || $0.value == 0x0401 || $0.value == 0x0451
+            }
+        }
+        guard !visibleRecords.isEmpty else {
+            throw InterpretationError.invalidCorpus(L10n.text("В библиотеке нет русскоязычных трактовок.", "The library contains no Russian interpretations."))
+        }
+        self.records = visibleRecords
+        let sourceCounts = Dictionary(grouping: visibleRecords, by: \.source).mapValues(\.count)
+        self.sources = corpus.sources.compactMap { source in
+            guard let count = sourceCounts[source.fileName] else { return nil }
+            return CorpusSource(id: source.id, fileName: source.fileName, title: source.title,
+                                sha256: source.sha256, sectionCount: count)
+        }
         var index: [String: [Int]] = [:]
-        for (offset, record) in corpus.records.enumerated() {
+        for (offset, record) in visibleRecords.enumerated() {
             for binding in record.bindings { index[binding, default: []].append(offset) }
         }
         self.index = index
-        self.searchTitles = corpus.records.map { Self.normalized($0.title + " " + $0.sourceTitle) }
-        self.searchBodies = corpus.records.map { Self.normalized($0.body) }
+        self.searchTitles = visibleRecords.map { Self.normalized($0.title + " " + $0.sourceTitle) }
+        self.searchBodies = visibleRecords.map { Self.normalized($0.body) }
+    }
+
+    /// Deterministic script detection for the Russian/English supplied corpora.
+    /// Latin object codes, names and references in Russian prose are allowed.
+    public static func isRussianText(_ text: String) -> Bool {
+        var cyrillic = 0, latin = 0
+        for scalar in text.unicodeScalars {
+            switch scalar.value {
+            case 0x0410...0x044F, 0x0401, 0x0451: cyrillic += 1
+            case 0x0041...0x005A, 0x0061...0x007A: latin += 1
+            default: break
+            }
+        }
+        return cyrillic > 0 && cyrillic >= latin * 2
     }
 
     public static var userCorpusURL: URL {

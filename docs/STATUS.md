@@ -1,6 +1,6 @@
 # AstraGlass — continuation checkpoint
 
-Updated: 4 November 2026 (Moscow). Version: **0.3.0**.
+Updated: 4 November 2026 (Moscow). Version: **0.3.1**.
 
 ## Repository and authorization
 - Continue `Share/Projects/AstraGlass`, not the older AstrologMac project.
@@ -63,3 +63,12 @@ bash scripts/package.sh --public
 - Personal and public DMG/ZIP completed; signatures, readonly DMG mounts and relocated natal/synastry/graphics passed. Public packages contain no private corpora. Native runtime is required for hdiutil.
 - Personal DMG saved for delivery; release URL: https://github.com/zel0th/AstraGlass/releases/tag/v0.3.0. Code commit: 41b7c5c. Distribution evidence: docs/validation/distribution-0.3.0.json.
 - Additional tests: bash scripts/test-database.sh; bash scripts/test-resources.sh.
+
+## 0.3.1 fixes
+- Missing custom corpus no longer appears in the picker; stale selections preserve the existing library without an error.
+- Txt3 display name is now «Сборник астрологических трактовок», retaining the persisted enum ID.
+- Russian-language records only across chart lookups/search/PDF: 22,422 records / 244 sources from the supplied collection. Original indexes unchanged. English-only imports rejected.
+- Explicit object palette in chart, table, inspector, settings and native PDF/PNG; Sun and Mars red, selection retains object color.
+- Tests passed: core 18, atlas 27, workspace 12, resource/font/language/palette checks. GUI verified two installed choices and the user's Moon–Saturn opposition example without English passages.
+- Both 0.3.1 DMG/ZIP packages passed signature, mount and relocated-engine checks. Personal archives retain both original corpora; public packages contain none.
+- PDF color cover visually verified. Release URL: https://github.com/zel0th/AstraGlass/releases/tag/v0.3.1.

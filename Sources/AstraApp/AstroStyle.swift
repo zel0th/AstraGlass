@@ -12,6 +12,22 @@ enum AstroStyle {
     static var signNames: [String] { [L10n.text("Овен"), L10n.text("Телец"), L10n.text("Близнецы"), L10n.text("Рак"), L10n.text("Лев"), L10n.text("Дева"), L10n.text("Весы"), L10n.text("Скорпион"), L10n.text("Стрелец"), L10n.text("Козерог"), L10n.text("Водолей"), L10n.text("Рыбы")] }
     static let signGlyphs = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"]
     static let elementColors: [Color] = [.orange, .green, .cyan, .indigo]
+    /// An explicit app palette, independent of a planet's current zodiac sign.
+    /// Selection uses an outline; it never replaces the object's characteristic color.
+    static func objectColor(_ id: Int) -> Color {
+        switch id {
+        case 1, 5, 10, 74: return .red // Sun, Mars, Pluto, Charon
+        case 2, 9: return .blue       // Moon, Neptune
+        case 3, 8, 21: return .cyan   // Mercury, Uranus, East Point
+        case 0, 4, 12: return .green  // Earth, Venus, Ceres
+        case 6, 15, 19: return .orange // Jupiter, Vesta, Fortune
+        case 7: return Color(red: 0.72, green: 0.53, blue: 0.25) // Saturn: ochre
+        case 11, 13: return .teal     // Chiron, Pallas
+        case 14, 16, 18, 20: return .purple // Juno, North Node, Lilith, Vertex
+        case 17: return .pink        // South Node
+        default: return .secondary
+        }
+    }
     static func name(_ id: Int) -> String { id == 74 ? L10n.text("Харон", "Charon") : planetNames.indices.contains(id) ? planetNames[id] : L10n.text("Объект \(id)", "Object \(id)") }
     /// Charon has no widely established Unicode astrology glyph; an explicit
     /// abbreviation avoids a missing-font box or an invented planetary symbol.
