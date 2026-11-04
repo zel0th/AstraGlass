@@ -8,22 +8,22 @@ typealias StoredState<Value> = SwiftUI.State<Value>
 enum AstroStyle {
     static let accent = Color(red: 0.45, green: 0.37, blue: 0.83)
     static var planetNames: [String] { [L10n.text("Земля"), L10n.text("Солнце"), L10n.text("Луна"), L10n.text("Меркурий"), L10n.text("Венера"), L10n.text("Марс"), L10n.text("Юпитер"), L10n.text("Сатурн"), L10n.text("Уран"), L10n.text("Нептун"), L10n.text("Плутон"), L10n.text("Хирон"), L10n.text("Церера"), L10n.text("Паллада"), L10n.text("Юнона"), L10n.text("Веста"), L10n.text("Северный узел"), L10n.text("Южный узел"), L10n.text("Лилит"), L10n.text("Фортуна"), L10n.text("Вертекс"), L10n.text("Восточная точка")] }
-    static let planetGlyphs = ["♁", "☉", "☽", "☿", "♀", "♂", "♃", "♄", "♅", "♆", "♇", "⚷", "⚳", "⚴", "⚵", "⚶", "☊", "☋", "⚸", "⊗", "Vx", "EP"]
+    static let planetGlyphs = ["♁", "☉", "☽", "☿", "♀", "♂", "♃", "♄", "♅", "♆", "⯓", "⚷", "⚳", "⚴", "⚵", "⚶", "☊", "☋", "⚸", "⊗", "Vx", "EP"]
     static var signNames: [String] { [L10n.text("Овен"), L10n.text("Телец"), L10n.text("Близнецы"), L10n.text("Рак"), L10n.text("Лев"), L10n.text("Дева"), L10n.text("Весы"), L10n.text("Скорпион"), L10n.text("Стрелец"), L10n.text("Козерог"), L10n.text("Водолей"), L10n.text("Рыбы")] }
-    static let signGlyphs = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"].map { $0 + "\u{FE0E}" }
+    static let signGlyphs = ["♈", "♉", "♊", "♋", "♌", "♍", "♎", "♏", "♐", "♑", "♒", "♓"]
     static let elementColors: [Color] = [.orange, .green, .cyan, .indigo]
     static func name(_ id: Int) -> String { id == 74 ? L10n.text("Харон", "Charon") : planetNames.indices.contains(id) ? planetNames[id] : L10n.text("Объект \(id)", "Object \(id)") }
     /// Charon has no widely established Unicode astrology glyph; an explicit
     /// abbreviation avoids a missing-font box or an invented planetary symbol.
     static func glyph(_ id: Int) -> String {
         if id == 74 { return "Ch" }
-        return planetGlyphs.indices.contains(id) ? planetGlyphs[id] + "\u{FE0E}" : "\(id)"
+        return planetGlyphs.indices.contains(id) ? planetGlyphs[id] : "\(id)"
     }
     private static let registeredSymbolFont: String = {
-        if let url = Bundle.main.url(forResource: "DejaVuSans", withExtension: "ttf", subdirectory: "Fonts") {
+        if let url = Bundle.main.url(forResource: "AstraGlassAstrology", withExtension: "ttf", subdirectory: "Fonts") {
             CTFontManagerRegisterFontsForURL(url as CFURL, .process, nil)
         }
-        return "DejaVuSans"
+        return "AstraGlassAstrology"
     }()
     static func symbolFont(size: CGFloat) -> Font { .custom(registeredSymbolFont, size: size) }
     static func symbolNSFont(size: CGFloat) -> NSFont {
@@ -51,10 +51,10 @@ enum AstroStyle {
 }
 
 enum AppSection: String, CaseIterable, Identifiable {
-    case chart = "Карта", planets = "Планеты", aspects = "Аспекты", relationships = "Синастрия", transits = "Транзиты", reports = "Отчёты", graphics = "Графика", library = "Библиотека"
+    case savedCharts = "Мои карты", chart = "Карта", planets = "Планеты", aspects = "Аспекты", relationships = "Синастрия", transits = "Транзиты", reports = "Отчёты", graphics = "Графика", library = "Библиотека"
     var id: String { rawValue }
     var symbol: String {
-        switch self { case .chart: return "circle.hexagongrid"; case .planets: return "sparkles"; case .aspects: return "point.3.connected.trianglepath.dotted"; case .relationships: return "person.2"; case .transits: return "clock.arrow.circlepath"; case .reports: return "chart.xyaxis.line"; case .graphics: return "globe.europe.africa"; case .library: return "books.vertical" }
+        switch self { case .savedCharts: return "tray.full"; case .chart: return "circle.hexagongrid"; case .planets: return "sparkles"; case .aspects: return "point.3.connected.trianglepath.dotted"; case .relationships: return "person.2"; case .transits: return "clock.arrow.circlepath"; case .reports: return "chart.xyaxis.line"; case .graphics: return "globe.europe.africa"; case .library: return "books.vertical" }
     }
 }
 
@@ -91,7 +91,7 @@ struct SourcePassageView: View {
             if expanded {
                 Text(record.body).font(.system(size: 14, design: .serif)).lineSpacing(5).textSelection(.enabled).fixedSize(horizontal: false, vertical: true)
                 Text(record.sourceTitle).font(.caption).foregroundStyle(.secondary)
-                Text(L10n.text("\(record.source) · абзацы \(record.paragraphStart)–\(record.paragraphEnd)", "\(record.source) · paragraphs \(record.paragraphStart)–\(record.paragraphEnd)")).font(.system(size: 10)).foregroundStyle(.tertiary).textSelection(.enabled)
+                Text(record.source + " · " + record.sourceRange).font(.system(size: 10)).foregroundStyle(.tertiary).textSelection(.enabled)
             }
         }
     }

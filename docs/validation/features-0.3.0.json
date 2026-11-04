@@ -1,0 +1,31 @@
+{
+  "version": "0.3.0",
+  "date": "2026-11-04",
+  "core_groups": 17,
+  "atlas_checks": 27,
+  "workspace_groups": 11,
+  "database_scenarios": 7,
+  "txt3_importer_checks": 17,
+  "localization_keys": 302,
+  "pdf_pages": 18,
+  "pdf_paragraphs_preserved": 45,
+  "resource_font_coverage": "passed",
+  "house_descriptions": 40,
+  "txt3_sources": 300,
+  "txt3_sections": 27349,
+  "txt3_natal_sections": 7887,
+  "txt3_load_seconds": 3.013,
+  "gui_observations": [
+    "Bundled Podvodny text visible",
+    "Txt3 selected and persists after relaunch",
+    "Traditional Pluto and planet glyphs rendered",
+    "Helsinki popover filters correctly",
+    "City selection fills coordinates and UTC+02 for 2000-01-01",
+    "Apply saved a demo chart, My charts reopened it"
+  ],
+  "gui_process_sample": {
+    "rss_kib": 429984,
+    "ps_cpu_percent": 0.0,
+    "controlled_benchmark": false
+  }
+}

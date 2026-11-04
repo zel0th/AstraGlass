@@ -298,3 +298,7 @@
 "Не удалось запустить расчётный модуль. Откройте AstraGlass из полной папки приложения или установите свежую сборку." = "The calculation module could not be started. Open AstraGlass from the complete application bundle or install a fresh build.";
 "Знаки" = "Signs";
 "Дома" = "Houses";
+
+"Мои карты" = "My charts";
+"Пуллен S.Ratio плавно распределяет размеры домов между ASC и MC по соотношению длин секторов." = "Pullen S.Ratio smoothly distributes house sizes between ASC and MC using quadrant size ratios.";
+"Пуллен S.Delta плавно распределяет размеры домов между ASC и MC по разности длин секторов." = "Pullen S.Delta smoothly distributes house sizes between ASC and MC using quadrant size differences.";

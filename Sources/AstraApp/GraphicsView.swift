@@ -94,7 +94,7 @@ struct ChartExportPage: View {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], alignment: .leading, spacing: 9) {
                 ForEach(snapshot.positions) { planet in
                     HStack(spacing: 7) {
-                        Text(AstroStyle.glyph(planet.id)).font(AstroStyle.symbolFont(size: 15)).frame(width: 20).foregroundStyle(AstroStyle.accent)
+                        Text(AstroStyle.glyph(planet.id)).font(AstroStyle.symbolFont(size: 15)).lineLimit(1).minimumScaleFactor(0.65).frame(width: 22).foregroundStyle(AstroStyle.accent)
                         Text(AstroStyle.name(planet.id)).frame(width: 87, alignment: .leading)
                         Text(AstroStyle.signGlyphs[planet.sign]).font(AstroStyle.symbolFont(size: 14))
                         Text(AstroStyle.position(planet.longitude)).monospacedDigit()

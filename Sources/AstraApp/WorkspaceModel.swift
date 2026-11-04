@@ -3,13 +3,6 @@ import SwiftUI
 import AppKit
 import UniformTypeIdentifiers
 
-struct SavedChart: Codable {
-    var format = "AstraGlass.chart.v1"
-    var title: String
-    var place: String
-    var input: ChartInput
-}
-
 @MainActor
 final class WorkspaceModel: ObservableObject {
     @Published var title = L10n.text("Пример · 1 января 2000") {
@@ -38,6 +31,11 @@ final class WorkspaceModel: ObservableObject {
     @Published var selectedRecord: InterpretationRecord?
     @Published var section: AppSection? = .chart
     @Published var library: InterpretationLibrary?
+    @Published private(set) var interpretationPack: InterpretationPack = .podvodny
+    @Published private(set) var savedCharts: [StoredChart] = []
+    private(set) var currentChartID: UUID?
+    private var secondaryChartID: UUID?
+    private let chartDatabase: ChartDatabase
     @Published var isCalculating = false
     @Published var errorMessage: String?
     @Published var report = ""
@@ -76,15 +74,19 @@ final class WorkspaceModel: ObservableObject {
     private var reportTask: Task<Void, Never>?
     private var graphicTask: Task<Void, Never>?
 
-    init(engine: AstrologEngine = AstrologEngine()) {
+    init(engine: AstrologEngine = AstrologEngine(), databaseURL: URL = ChartDatabase.defaultURL) {
         self.engine = engine
-        do { library = try InterpretationLibrary.loadBundled() }
+        self.chartDatabase = ChartDatabase(url: databaseURL)
+        let preferred = InterpretationPack(rawValue: UserDefaults.standard.string(forKey: "interpretationPack") ?? "podvodny") ?? .podvodny
+        interpretationPack = preferred.url != nil ? preferred : (InterpretationPack.podvodny.url != nil ? .podvodny : .custom)
+        do { library = try InterpretationLibrary.load(interpretationPack) }
         catch InterpretationError.missingCorpus {
             // The public distribution intentionally starts without private books.
             // The inspector and settings already explain how to import them.
             library = nil
         }
         catch { errorMessage = L10n.text("Не удалось открыть тексты: ", "Unable to open texts: ") + error.localizedDescription }
+        reloadCharts()
         AppProfiler.startIfRequested()
     }
 
@@ -188,7 +190,57 @@ final class WorkspaceModel: ObservableObject {
         showEditor = true
     }
 
+    func reloadCharts() {
+        do { savedCharts = try chartDatabase.load() }
+        catch { errorMessage = L10n.text("Не удалось прочитать базу карт: ", "Unable to read chart database: ") + error.localizedDescription }
+    }
+
     func save() {
+        do {
+            let item = try chartDatabase.save(SavedChart(title: title, place: place, input: input), id: currentChartID)
+            currentChartID = item.id
+            reloadCharts()
+            section = .savedCharts
+        } catch { errorMessage = error.localizedDescription }
+    }
+
+    func commitEditorChart(_ chart: SavedChart, secondary: Bool) throws {
+        let id = secondary ? secondaryChartID : (creatingChart ? nil : currentChartID)
+        let item = try chartDatabase.save(chart, id: id)
+        try applyChart(chart, secondary: secondary)
+        if secondary { secondaryChartID = item.id } else { currentChartID = item.id; section = .chart }
+        reloadCharts()
+    }
+
+    func openStoredChart(_ item: StoredChart, secondary: Bool = false) {
+        do {
+            try applyChart(item.chart, secondary: secondary)
+            if secondary { secondaryChartID = item.id; section = .relationships }
+            else { currentChartID = item.id; section = .chart }
+        } catch { errorMessage = error.localizedDescription }
+    }
+
+    func removeStoredChart(_ item: StoredChart) {
+        do {
+            try chartDatabase.remove(id: item.id)
+            if currentChartID == item.id { currentChartID = nil }
+            if secondaryChartID == item.id { secondaryChartID = nil }
+            reloadCharts()
+        } catch { errorMessage = error.localizedDescription }
+    }
+
+    func revealChartDatabase() { NSWorkspace.shared.activateFileViewerSelecting([chartDatabase.url]) }
+
+    func selectInterpretationPack(_ pack: InterpretationPack) {
+        do {
+            let loaded = try InterpretationLibrary.load(pack)
+            library = loaded; interpretationPack = pack
+            UserDefaults.standard.set(pack.rawValue, forKey: "interpretationPack")
+            selectedRecord = nil; libraryCategory = "Все"; librarySearch = ""
+        } catch { errorMessage = error.localizedDescription }
+    }
+
+    func exportChart() {
         let chart = SavedChart(title: title, place: place, input: input)
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.json]
@@ -207,7 +259,9 @@ final class WorkspaceModel: ObservableObject {
         guard panel.runModal() == .OK, let url = panel.url else { return }
         do {
             let chart = try JSONDecoder().decode(SavedChart.self, from: Data(contentsOf: url))
-            try applyChart(chart, secondary: secondary)
+            let item = try chartDatabase.save(chart)
+            reloadCharts()
+            openStoredChart(item, secondary: secondary)
         } catch { errorMessage = L10n.text("Не удалось открыть карту: ", "Unable to open chart: ") + error.localizedDescription }
     }
 
@@ -232,6 +286,8 @@ final class WorkspaceModel: ObservableObject {
         do {
             let imported = try InterpretationLibrary.importFile(url)
             library = imported; selectedRecord = nil
+            interpretationPack = .custom
+            UserDefaults.standard.set(InterpretationPack.custom.rawValue, forKey: "interpretationPack")
             libraryCategory = "Все"
             librarySearch = ""
             section = .library
@@ -381,7 +437,7 @@ enum ReportPreset: String, CaseIterable, Identifiable {
 }
 
 func houseSystemName(_ id: Int) -> String {
-    let names = [L10n.text("Плацидус"), L10n.text("Кох"), L10n.text("Равнодомная"), L10n.text("Кампано"), L10n.text("Меридианная"), L10n.text("Региомонтан"), L10n.text("Порфирий"), L10n.text("Морин"), L10n.text("Топоцентрическая"), L10n.text("Алькабициус"), L10n.text("Крусинский"), L10n.text("Равнодомная (MC)"), L10n.text("Пуллен (S.Ratio)"), L10n.text("Пуллен (S.Delta)"), L10n.text("Целые знаки"), L10n.text("Ведическая"), L10n.text("Шрипати"), L10n.text("Горизонтальная"), "APC", L10n.text("Картер"), "Sunshine", L10n.text("Савар A"), L10n.text("Без домов"), L10n.text("Целые знаки (MC)"), L10n.text("Ведическая (MC)"), L10n.text("Равнодомная (сбаланс.)"), L10n.text("Целые знаки (сбаланс.)"), L10n.text("Ведическая (сбаланс.)"), L10n.text("Равнодомная (EP)"), L10n.text("Целые знаки (EP)"), L10n.text("Ведическая (EP)"), L10n.text("Равнодомная (Вертекс)"), L10n.text("Целые знаки (Вертекс)"), L10n.text("Ведическая (Вертекс)"), L10n.text("Порфирий (EP)"), L10n.text("Порфирий (Вертекс)"), L10n.text("Пуллен (SR, EP)"), L10n.text("Пуллен (SR, Вертекс)"), L10n.text("Пуллен (SD, EP)"), L10n.text("Пуллен (SD, Вертекс)")]
+    let names = [L10n.text("Плацидус"), L10n.text("Кох"), L10n.text("Равнодомная"), L10n.text("Кампано"), L10n.text("Меридианная"), L10n.text("Региомонтан"), L10n.text("Порфирий"), L10n.text("Морин"), L10n.text("Топоцентрическая"), L10n.text("Алькабициус"), L10n.text("Крусинский"), L10n.text("Равнодомная (MC)"), L10n.text("Пуллен (S.Ratio)"), L10n.text("Пуллен (S.Delta)"), L10n.text("Целые знаки"), L10n.text("Ведическая"), L10n.text("Шрипати"), L10n.text("Горизонтальная"), "APC", L10n.text("Картер"), "Sunshine", L10n.text("Савар A"), L10n.text("Без домов"), L10n.text("Целые знаки (MC)"), L10n.text("Ведическая (MC)"), L10n.text("Равнодомная (сбаланс.)"), L10n.text("Целые знаки (сбаланс.)"), L10n.text("Ведическая (сбаланс.)"), L10n.text("Равнодомная (EP)"), L10n.text("Целые знаки (EP)"), L10n.text("Ведическая (EP)"), L10n.text("Равнодомная (Антивертекс)", "Equal (Antivertex)"), L10n.text("Целые знаки (Антивертекс)", "Whole signs (Antivertex)"), L10n.text("Ведическая (Антивертекс)", "Vedic (Antivertex)"), L10n.text("Порфирий (EP)"), L10n.text("Порфирий (Антивертекс)", "Porphyry (Antivertex)"), L10n.text("Пуллен (SR, EP)"), L10n.text("Пуллен (SR, Антивертекс)", "Pullen (SR, Antivertex)"), L10n.text("Пуллен (SD, EP)"), L10n.text("Пуллен (SD, Антивертекс)", "Pullen (SD, Antivertex)")]
     return names.indices.contains(id) ? names[id] : L10n.text("Система домов \(id)", "House system \(id)")
 }
 

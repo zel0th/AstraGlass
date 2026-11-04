@@ -8,7 +8,6 @@ struct ChartEditor: View {
     @StoredState private var title = ""
     @StoredState private var place = ""
     @StoredState private var input = ChartInput()
-    @StoredState private var cityQuery = ""
     @StoredState private var automaticTimeZone = false
     @StoredState private var matches: [CivilTimeMatch] = []
     @StoredState private var occurrence = -1
@@ -18,7 +17,6 @@ struct ChartEditor: View {
     @StoredState private var resolvedCivilFields: [Int] = []
     @StoredState private var resolvedAutomaticTimeZone = false
     private let atlas = CityAtlas.shared
-    private var cities: [AtlasCity] { atlas.search(cityQuery, limit: 6) }
     private var civilFields: [Int] { [input.year, input.month, input.day, input.hour, input.minute] }
     private var selectedCity: AtlasCity? { atlas.city(id: input.cityID) }
     private var selectedMatch: CivilTimeMatch? { matches.indices.contains(occurrence) ? matches[occurrence] : nil }
@@ -95,7 +93,10 @@ struct ChartEditor: View {
                             Picker(L10n.text("Система домов", "House system"), selection: $input.houseSystem) {
                                 ForEach(0..<40, id: \.self) { Text(houseSystemName($0)).tag($0) }
                             }
+                            Text(houseSystemDescription(input.houseSystem)).font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                            Divider()
                             Toggle(L10n.text("Сидерический зодиак", "Sidereal zodiac"), isOn: $input.sidereal)
+                            Text(zodiacDescription(sidereal: input.sidereal)).font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                         }.padding(8)
                     }
                 }.frame(maxWidth: .infinity, alignment: .topLeading)
@@ -110,7 +111,7 @@ struct ChartEditor: View {
                     .disabled(automaticTimeZone && (timeZoneError != nil || selectedMatch == nil))
             }
         }
-        .padding(24).frame(width: 800, height: 700)
+        .padding(24).frame(width: 880, height: 760)
         .onAppear(perform: initialize)
         .onChange(of: civilFields) { _, value in if initialized && value != resolvedCivilFields { refreshTimeZone() } }
         .onChange(of: automaticTimeZone) { _, value in if initialized && value != resolvedAutomaticTimeZone { refreshTimeZone() } }
@@ -120,30 +121,8 @@ struct ChartEditor: View {
     private var citySelection: some View {
         GroupBox(L10n.text("Город", "City")) {
             VStack(alignment: .leading, spacing: 10) {
-                TextField(L10n.text("Поиск города или кода страны…", "Search city or country code…"), text: $cityQuery)
-                    .textFieldStyle(.roundedBorder)
-                if cityQuery.trimmingCharacters(in: .whitespaces).count >= 2 {
-                    if cities.isEmpty {
-                        Text(L10n.text("Город не найден. Попробуйте латинское название или введите координаты вручную.", "No city found. Try its Latin name or enter coordinates manually.")).font(.caption).foregroundStyle(.secondary)
-                    } else {
-                        VStack(alignment: .leading, spacing: 0) {
-                            ForEach(cities) { city in
-                                Button { choose(city) } label: {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text(city.label).lineLimit(1)
-                                        Text(city.timeZoneIdentifier + " · " + String(format: "%.2f°, %.2f°", city.latitude, city.longitude)).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
-                                    }.padding(.vertical, 5).frame(maxWidth: .infinity, alignment: .leading).contentShape(Rectangle())
-                                }.buttonStyle(.plain)
-                                if city.id != cities.last?.id { Divider() }
-                            }
-                        }
-                    }
-                } else if let city = selectedCity {
-                    Label(city.label, systemImage: "mappin.and.ellipse").font(.subheadline.weight(.medium))
-                    Text(city.timeZoneIdentifier).font(.caption).foregroundStyle(.secondary)
-                } else {
-                    Text(L10n.text("Выберите город: координаты и смещение UTC подставятся по дате карты.", "Choose a city to fill coordinates and the UTC offset for the chart date.")).font(.caption).foregroundStyle(.secondary)
-                }
+                CityPicker(selected: selectedCity, choose: choose)
+                Text(L10n.text("Выберите город: координаты и часовой пояс подставятся по дате карты.", "Choose a city to fill coordinates and the time zone for the chart date.")).font(.caption).foregroundStyle(.secondary)
                 if atlas.cities.isEmpty {
                     Text(L10n.text("Атлас городов недоступен. Можно ввести координаты и UTC вручную.", "City atlas is unavailable. You can enter coordinates and UTC manually.")).font(.caption).foregroundStyle(.orange)
                 }
@@ -162,7 +141,7 @@ struct ChartEditor: View {
     private func choose(_ city: AtlasCity) {
         input.cityID = city.id; input.timeZoneIdentifier = city.timeZoneIdentifier
         input.latitude = city.latitude; input.longitude = city.longitude
-        place = city.label; cityQuery = ""; automaticTimeZone = true
+        place = city.label; automaticTimeZone = true
         refreshTimeZone()
     }
 
@@ -237,7 +216,7 @@ struct ChartEditor: View {
             input.usesAutomaticTimeZone = automaticTimeZone
             try input.validate()
             let chart = SavedChart(title: title.isEmpty ? L10n.text("Без названия", "Untitled") : title, place: place, input: input)
-            try model.applyChart(chart, secondary: secondary)
+            try model.commitEditorChart(chart, secondary: secondary)
             dismiss()
         } catch { validationError = error.localizedDescription }
     }

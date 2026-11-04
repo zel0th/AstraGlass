@@ -8,7 +8,7 @@ struct PlanetTableView: View {
             SectionHeading(eyebrow: L10n.text("Положения"), title: L10n.text("Планеты и точки"), subtitle: L10n.text("Эклиптическая долгота, движение и положение в домах"))
             if let snapshot = model.displaySnapshot {
                 Table(snapshot.positions, selection: Binding<Int?>(get: { model.selectedPlanet }, set: { if let id = $0 { model.selectPlanet(id) } })) {
-                    TableColumn(L10n.text("Объект")) { p in HStack(spacing: 12) { Text(AstroStyle.glyph(p.id)).font(AstroStyle.symbolFont(size: 24)).frame(width: 28).foregroundStyle(AstroStyle.accent); Text(AstroStyle.name(p.id)).fontWeight(.medium) } }.width(min: 140, ideal: 170)
+                    TableColumn(L10n.text("Объект")) { p in HStack(spacing: 12) { Text(AstroStyle.glyph(p.id)).font(AstroStyle.symbolFont(size: 24)).lineLimit(1).minimumScaleFactor(0.65).frame(width: 32).foregroundStyle(AstroStyle.accent); Text(AstroStyle.name(p.id)).fontWeight(.medium) } }.width(min: 140, ideal: 170)
                     TableColumn(L10n.text("Знак")) { p in HStack { Text(AstroStyle.signGlyphs[p.sign]).font(AstroStyle.symbolFont(size: 16)).foregroundStyle(AstroStyle.elementColors[p.sign % 4]); Text(AstroStyle.signNames[p.sign]) } }.width(min: 100, ideal: 120)
                     TableColumn(L10n.text("Положение")) { p in Text(AstroStyle.position(p.longitude)).monospacedDigit() }.width(min: 75, ideal: 85)
                     TableColumn(L10n.text("Дом")) { p in Text("\(p.house)").monospacedDigit() }.width(40)
@@ -32,7 +32,7 @@ struct AspectTableView: View {
     private var aspects: [ChartAspect] { (model.displaySnapshot?.aspects ?? []).filter { !majorOnly || ChartPreferences.majorAspectIDs.contains($0.kind) }.sorted { abs($0.orb) < abs($1.orb) } }
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            SectionHeading(eyebrow: L10n.text("Взаимодействия"), title: L10n.text("Аспекты карты"), subtitle: L10n.text("Выберите аспект: справа появятся соответствующие главы Подводного"))
+            SectionHeading(eyebrow: L10n.text("Взаимодействия"), title: L10n.text("Аспекты карты"), subtitle: L10n.text("Выберите аспект: справа появятся трактовки из выбранного набора", "Choose an aspect to see interpretations from the selected collection"))
             Toggle(L10n.text("Только мажорные аспекты"), isOn: $majorOnly).toggleStyle(.switch).controlSize(.small)
             List(aspects, selection: Binding<String?>(get: { model.selectedAspect?.id }, set: { id in if let a = aspects.first(where: {$0.id == id}) { model.selectAspect(a) } })) { aspect in
                 HStack(spacing: 16) {
@@ -76,7 +76,7 @@ struct InterpretationInspector: View {
             } else {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 25) {
-                        if model.selectedAspect != nil { Text(L10n.text("В книгах описаны проявления аспекта для каждой планеты отдельно. Ниже приведены эти авторские разделы.")).font(.caption).foregroundStyle(.secondary) }
+                        if model.selectedAspect != nil && model.interpretationPack == .podvodny { Text(L10n.text("В книгах описаны проявления аспекта для каждой планеты отдельно. Ниже приведены эти авторские разделы.")).font(.caption).foregroundStyle(.secondary) }
                         ForEach(model.relevantPassages) { record in SourcePassageView(record: record); Divider() }
                     }.padding(23)
                 }
@@ -90,7 +90,7 @@ struct LibraryView: View {
     @StoredState private var selectedID: String?
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
-            SectionHeading(eyebrow: L10n.text("Первоисточники"), title: L10n.text("Библиотека Подводного"), subtitle: L10n.text("Четыре части «Общей астрологии». Поиск по заголовкам и полному тексту."))
+            SectionHeading(eyebrow: L10n.text("Первоисточники"), title: model.interpretationPack.title, subtitle: L10n.text("Поиск по заголовкам и полному тексту выбранного набора.", "Search titles and full text in the selected collection."))
             HStack {
                 TextField(L10n.text("Планета, знак, дом или фраза"), text: $model.librarySearch).textFieldStyle(.roundedBorder)
                 Picker(L10n.text("Раздел"),selection:$model.libraryCategory) { Text(L10n.text("Все")).tag("Все"); ForEach(model.library?.categories ?? [],id:\.self) { Text(L10n.text($0)).tag($0) } }.labelsHidden().frame(width:130)

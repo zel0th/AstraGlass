@@ -36,7 +36,7 @@ enum ChartPDFExporter {
                 title: L10n.text("Библиотека трактовок", "Interpretation library"))
             for record in unique {
                 let source = "\(record.sourceTitle) · \(record.source) · " +
-                    L10n.text("абзацы", "paragraphs") + " \(record.paragraphStart)–\(record.paragraphEnd)"
+                    record.sourceRange
                 try writer.append(body(record.body), title: record.title, source: source)
             }
         }

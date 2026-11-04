@@ -16,7 +16,9 @@ AstraGlass использует настоящий движок Astrolog, а н�
 - Поиск по локальным текстам без учёта регистра и е/ё, указание первоисточника каждого раздела, импорт пользовательского индекса.
 - Светлое, тёмное и системное оформление, изменяемые боковые панели, стандартные меню и сочетания клавиш.
 
-[Подробное сравнение с Astrolog](docs/FEATURES.md) · [Начало работы](docs/GETTING_STARTED.md) · [Измерения производительности](docs/PERFORMANCE.md) · [Изменения 0.2.0](docs/RELEASE-0.2.0.md)
+[Подробное сравнение с Astrolog](docs/FEATURES.md) · [Начало работы](docs/GETTING_STARTED.md) · [Измерения производительности](docs/PERFORMANCE.md) · [Изменения 0.3.0](docs/RELEASE-0.3.0.md)
+
+В версии 0.3.0: астрологический шрифт с традиционным Плутоном, список городов с фильтрацией, выбор двух встроенных в личную сборку наборов трактовок, пояснения систем домов и локальная JSON-база «Мои карты».
 
 ## Сборка
 
@@ -80,3 +82,5 @@ python3 scripts/benchmark.py
 ## English
 
 AstraGlass is a native macOS 27 astrology application for Apple silicon, built with SwiftUI and system Liquid Glass controls. It combines the real Astrolog 8.0 engine with natal charts, synastry and transit reports, eleven graphics presets, PDF/PNG export, and a searchable local interpretation library. Users import their own Podvodny documents; the public repository does not redistribute the books. This release does not claim complete parity with every original Astrolog UI, animation, or macro feature. The source is licensed under AGPL-3.0-or-later.
+
+Шрифт `AstraGlass Astrology` создан из Astronomicon Roberto Corona (SIL OFL 1.1) и ASCII-глифов DejaVu Sans. Исходные шрифты, лицензии и скрипт воспроизведения включены в репозиторий; обычная сборка использует готовый TTF. Источник: https://astronomicon.co/en/astronomicon-fonts/.

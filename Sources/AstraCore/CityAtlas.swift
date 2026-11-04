@@ -54,7 +54,13 @@ public final class CityAtlas: Sendable {
 
     public func search(_ query: String, limit: Int = 8) -> [AtlasCity] {
         let needle = Self.normalize(query.trimmingCharacters(in: .whitespacesAndNewlines))
-        guard needle.count >= 2, limit > 0 else { return [] }
+        guard limit > 0 else { return [] }
+        if needle.isEmpty {
+            let popular = [("Moscow", "RU"), ("Saint Petersburg", "RU"), ("Helsinki", "FI"), ("Belgrade", "RS"), ("London", "GB"), ("Paris", "FR"), ("New York City", "ny")]
+            let featured = popular.compactMap { name, region in cities.first { $0.name == name && $0.region == region } }
+            let ids = Set(featured.map(\.id))
+            return Array((featured + cities.filter { !ids.contains($0.id) }).prefix(limit))
+        }
         let tokens = needle.split(separator: " ").map(String.init)
         let hits = cities.indices.filter { i in tokens.allSatisfy { searchNames[i].contains($0) } }
         let ranked = hits.sorted { a, b in

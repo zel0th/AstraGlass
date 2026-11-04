@@ -19,7 +19,7 @@ struct CityAtlasTests {
         try require(abs((moscow?.longitude ?? 0) - 37.6178) < 0.00001, "West-positive atlas converted to east-positive")
         try require(atlas.search("mOsCoW").contains { $0.region == "RU" }, "Case insensitive search")
         try require(atlas.search("Москва RU").first?.region == "RU", "City and country tokens")
-        try require(atlas.search("").isEmpty, "Empty search is bounded")
+        try require(atlas.search("").count == 8, "Empty dropdown shows a bounded city list")
         try require(atlas.search("Moscow").first { $0.region == "id" }?.regionLabel == "US-ID", "US state distinguishes same-name cities")
         try require(atlas.search("Petersburg", limit: 2).count <= 2, "Search result limit")
         try require(atlas.city(id: moscow?.id) == moscow, "Stable city identity")

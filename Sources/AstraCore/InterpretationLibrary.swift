@@ -1,5 +1,24 @@
 import Foundation
 
+public enum InterpretationPack: String, CaseIterable, Identifiable, Sendable {
+    case podvodny, txt3, custom
+    public var id: String { rawValue }
+    public var title: String {
+        switch self {
+        case .podvodny: return L10n.text("Подводный · Общая астрология", "Podvodny · General Astrology")
+        case .txt3: return L10n.text("Txt3 · сборник трактовок", "Txt3 · interpretation collection")
+        case .custom: return L10n.text("Импортированная библиотека", "Imported library")
+        }
+    }
+    public var url: URL? {
+        switch self {
+        case .podvodny: return Bundle.main.url(forResource: "interpretations", withExtension: "json")
+        case .txt3: return Bundle.main.url(forResource: "interpretations-txt3", withExtension: "json")
+        case .custom: return FileManager.default.fileExists(atPath: InterpretationLibrary.userCorpusURL.path) ? InterpretationLibrary.userCorpusURL : nil
+        }
+    }
+}
+
 public struct CorpusSource: Codable, Hashable, Sendable, Identifiable {
     public let id: String
     public let fileName: String
@@ -28,9 +47,13 @@ public struct InterpretationRecord: Codable, Hashable, Sendable, Identifiable {
     public let aspectAngle: Double?
     public let bindings: [String]
 
-    public var sourceReference: String {
-        "\(sourceTitle) · \(source) · блоки \(paragraphStart)–\(paragraphEnd)"
+    public var sourceRange: String {
+        let unit = id.hasPrefix("txt3-") ? L10n.text("строки", "lines") : L10n.text("абзацы", "paragraphs")
+        return "\(unit) \(paragraphStart)–\(paragraphEnd)"
     }
+
+    public var sourceReference: String { "\(sourceTitle) · \(source) · \(sourceRange)" }
+
 }
 
 public enum InterpretationError: LocalizedError {
@@ -51,7 +74,11 @@ public enum InterpretationError: LocalizedError {
 public struct InterpretationLibrary: Sendable {
     public let records: [InterpretationRecord]
     public let sources: [CorpusSource]
-    public var categories: [String] { ["Знаки", "Планеты", "Дома", "Аспекты"] }
+    public var categories: [String] {
+        let available = Set(records.map(\.category))
+        let main = ["Знаки", "Планеты", "Дома", "Аспекты"]
+        return main.filter { available.contains($0) } + available.subtracting(main).sorted()
+    }
     private let index: [String: [Int]]
     private let searchTitles: [String]
     private let searchBodies: [String]
@@ -64,7 +91,7 @@ public struct InterpretationLibrary: Sendable {
 
     public init(url: URL) throws {
         let size = (try? url.resourceValues(forKeys: [.fileSizeKey]).fileSize) ?? 0
-        guard size < 50_000_000 else { throw InterpretationError.invalidCorpus(L10n.text("Файл превышает 50 МБ.", "The file exceeds 50 MB.")) }
+        guard size < 256_000_000 else { throw InterpretationError.invalidCorpus(L10n.text("Файл превышает 256 МБ.", "The file exceeds 256 MB.")) }
         let corpus: Corpus
         do {
             corpus = try JSONDecoder().decode(Corpus.self, from: Data(contentsOf: url))
@@ -84,7 +111,7 @@ public struct InterpretationLibrary: Sendable {
             for binding in record.bindings { index[binding, default: []].append(offset) }
         }
         self.index = index
-        self.searchTitles = corpus.records.map { Self.normalized($0.title) }
+        self.searchTitles = corpus.records.map { Self.normalized($0.title + " " + $0.sourceTitle) }
         self.searchBodies = corpus.records.map { Self.normalized($0.body) }
     }
 
@@ -102,6 +129,11 @@ public struct InterpretationLibrary: Sendable {
             return try InterpretationLibrary(url: url)
         }
         throw InterpretationError.missingCorpus
+    }
+
+    public static func load(_ pack: InterpretationPack) throws -> InterpretationLibrary {
+        guard let url = pack.url else { throw InterpretationError.missingCorpus }
+        return try InterpretationLibrary(url: url)
     }
 
     /// Validates before replacing the owner's persistent local index.
@@ -140,9 +172,9 @@ public struct InterpretationLibrary: Sendable {
     /// Each endpoint's aspect passage is shown independently, as written by the author.
     /// The supplied books do not contain synthetic two-planet pair interpretations.
     public func forAspect(first: Int, second: Int, angle: Double) -> [InterpretationRecord] {
-        let supported = [0, 30, 36, 45, 60, 72, 90, 108, 120, 135, 144, 150, 180]
+        let supported = [0, 30, 36, 40, 45, 60, 72, 90, 108, 120, 135, 144, 150, 180]
         guard let exact = supported.first(where: { abs(Double($0) - angle) < 0.01 }) else { return [] }
-        return lookup(["aspect-planet:\(exact):\(first)", "aspect-planet:\(exact):\(second)", "aspect:\(exact)"])
+        return lookup(["aspect-pair:\(exact):\(min(first, second)):\(max(first, second))", "aspect-planet:\(exact):\(first)", "aspect-planet:\(exact):\(second)", "aspect:\(exact)"])
     }
 
     public func forHouse(number: Int, sign: Int) -> [InterpretationRecord] {

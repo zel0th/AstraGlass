@@ -1,5 +1,6 @@
 import AppKit
 import PDFKit
+import CoreText
 
 /// Run on macOS with all application sources and ASTRAGLASS_WORKSPACE_TESTS.
 /// Exercises actual PDF rendering, text extraction, page bounds and pagination.
@@ -12,6 +13,8 @@ struct PDFExportTests {
     static func main() throws {
         _ = NSApplication.shared
         let root = URL(fileURLWithPath: CommandLine.arguments.dropFirst().first ?? FileManager.default.currentDirectoryPath)
+        CTFontManagerRegisterFontsForURL(root.appendingPathComponent("Resources/Fonts/AstraGlassAstrology.ttf") as CFURL, .process, nil)
+        try require(AstroStyle.symbolNSFont(size: 24).fontName == "AstraGlassAstrology", "PDF must use the bundled astrology font")
         let output = root.appendingPathComponent(".build/tests/pdf-export.pdf")
         try FileManager.default.createDirectory(at: output.deletingLastPathComponent(), withIntermediateDirectories: true)
         let positions = (1...10).map {

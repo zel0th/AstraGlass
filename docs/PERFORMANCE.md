@@ -45,3 +45,9 @@ Historical 0.1.1 records remain in `validation/app-background-idle.json`, `app-i
 Commands: `bash scripts/test.sh`, `bash scripts/test-bundle-engine.sh`, `bash scripts/test-workspace.sh`, `bash scripts/test-pdf.sh`, `python3 scripts/check-localizations.py`, `python3 scripts/test-engine-preferences.py`, `bash scripts/package.sh --public`.
 
 For GUI profiling launch with `--profile-output /absolute/path/result.json --profile-seconds 30 --profile-delay 10 --profile-label scenario`. Production bundles contain no profile-request.json and do not enable a profiling timer on ordinary launches.
+
+## 0.3.0 corpus and feature check
+
+The optional Txt3 collection contains 27,349 sections from 300 sources. The native resource harness loaded and indexed it in **3.013 seconds** (includes the few lookup assertions). After UI exploration with that collection selected, a single `ps` observation of the GUI reported **419.91 MiB RSS** and **0.0% CPU**. This is an observational snapshot, not an idle time-series or leak test; do not compare it directly with the controlled historical runs. The larger corpus explains additional retained text and search-index storage.
+
+The 0.3.0 feature suite passed: 11 workspace groups including database relaunch/recalculation, 7 database scenarios, 17 synthetic Txt3 importer checks, actual CoreText glyph coverage, 40 nonempty house explanations and the existing 18-page PDF regression.

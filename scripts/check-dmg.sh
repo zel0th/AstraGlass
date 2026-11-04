@@ -15,7 +15,7 @@ APP="$MOUNT/AstraGlass.app"
 codesign --verify --deep --strict "$APP"
 test "$(readlink "$MOUNT/Applications")" = /Applications
 if [[ "$INCLUDE" == 0 ]]; then
-  test ! -e "$APP/Contents/Resources/interpretations.json"
+  test -z "$(find "$APP/Contents/Resources" -name 'interpretations*.json' -print)"
 else
   test -s "$APP/Contents/Resources/interpretations.json"
 fi

@@ -25,14 +25,20 @@ chmod 755 "$APP/Contents/Helpers/astrolog" "$APP/Contents/MacOS/AstraGlass"
 rm -f "$APP/Contents/Resources/Engine/astrolog"
 cp -R "$ROOT/Resources/en.lproj" "$ROOT/Resources/ru.lproj" "$APP/Contents/Resources/"
 mkdir -p "$APP/Contents/Resources/Fonts"
-cp "$ROOT/Resources/Fonts/DejaVuSans.ttf" "$ROOT/Resources/Fonts/LICENSE-DejaVu.txt" "$APP/Contents/Resources/Fonts/"
+cp "$ROOT/Resources/Fonts/DejaVuSans.ttf" "$ROOT/Resources/Fonts/LICENSE-DejaVu.txt" "$ROOT/Resources/Fonts/AstraGlassAstrology.ttf" "$ROOT/Resources/Fonts/LICENSE-Astronomicon.txt" "$APP/Contents/Resources/Fonts/"
 cp "$ROOT/Upstream/Astrolog/astrolog.as" "$ROOT/Upstream/Astrolog/atlas.as" "$ROOT/Upstream/Astrolog/timezone.as" "$ROOT/Upstream/Astrolog/sefstars.txt" "$ROOT/Upstream/Astrolog/seorbel.txt" "$APP/Contents/Resources/Engine/"
 rm -rf "$APP/Contents/Resources/Engine/ephem"
 if [[ -d "$ROOT/Upstream/Astrolog/ephem" ]]; then cp -R "$ROOT/Upstream/Astrolog/ephem" "$APP/Contents/Resources/Engine/"; fi
 cp "$ROOT/LICENSE" "$APP/Contents/Resources/LICENSE"
 cp "$ROOT/Upstream/Astrolog/license.htm" "$APP/Contents/Resources/Astrolog-License.htm"
 cp "$ROOT/Upstream/Astrolog/astrolog.htm" "$APP/Contents/Resources/Astrolog-Manual.htm"
-if [[ "$INCLUDE_CORPUS" == 1 && -f "$ROOT/Resources/interpretations.json" ]]; then cp "$ROOT/Resources/interpretations.json" "$APP/Contents/Resources/interpretations.json"; else rm -f "$APP/Contents/Resources/interpretations.json"; fi
+# Always remove stale private collections before selecting this build's resources.
+rm -f "$APP/Contents/Resources"/interpretations*.json
+if [[ "$INCLUDE_CORPUS" == 1 ]]; then
+  for CORPUS in "$ROOT/Resources"/interpretations*.json; do
+    [[ ! -f "$CORPUS" ]] || cp "$CORPUS" "$APP/Contents/Resources/"
+  done
+fi
 rm -f "$APP/Contents/Resources/profile-request.json"
 if [[ ! -f "$ROOT/Resources/AppIcon.icns" ]]; then bash "$ROOT/scripts/make-icon.sh"; fi
 cp "$ROOT/Resources/AppIcon.icns" "$APP/Contents/Resources/"

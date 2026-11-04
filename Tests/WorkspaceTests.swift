@@ -163,6 +163,27 @@ struct WorkspaceTests {
             try require(restoredPreferences == model.preferences, "Preferences must survive relaunch")
             checks.append("Settings invalidate stale results, filter the actual engine snapshot and persist")
 
+            let dbFolder = FileManager.default.temporaryDirectory.appendingPathComponent("AstraGlass-workspace-db-" + UUID().uuidString)
+            defer { try? FileManager.default.removeItem(at: dbFolder) }
+            let dbURL = dbFolder.appendingPathComponent("charts.json")
+            let dbModel = WorkspaceModel(engine: engine, databaseURL: dbURL)
+            dbModel.creatingChart = true
+            try dbModel.commitEditorChart(savedSecondary, secondary: false)
+            try require(dbModel.savedCharts.count == 1 && dbModel.currentChartID != nil, "Apply automatically saves a new chart")
+            let dbID = dbModel.currentChartID
+            dbModel.creatingChart = false
+            var edited = savedSecondary; edited.title = "Изменённая сохранённая карта"
+            try dbModel.commitEditorChart(edited, secondary: false)
+            try require(dbModel.savedCharts.count == 1 && dbModel.currentChartID == dbID, "Edit updates one database record")
+            let reopenedModel = WorkspaceModel(engine: engine, databaseURL: dbURL)
+            try require(reopenedModel.savedCharts.count == 1, "Database list survives a new workspace")
+            reopenedModel.openStoredChart(reopenedModel.savedCharts[0])
+            try await waitUntilFinished { reopenedModel.isCalculating }
+            try require(reopenedModel.title == edited.title && reopenedModel.input == edited.input && reopenedModel.snapshot != nil, "Reopen restores and calculates persisted input")
+            reopenedModel.openStoredChart(reopenedModel.savedCharts[0], secondary: true)
+            try require(reopenedModel.secondaryInput == edited.input, "Saved chart can be opened as the second chart")
+            checks.append("JSON database autosave, update without duplicates, relaunch, recalculation and second-chart reopen")
+
             let result: [String: Any] = ["passed": checks.count, "failed": 0, "checks": checks,
                                          "timestamp": ISO8601DateFormatter().string(from: Date())]
             let data = try JSONSerialization.data(withJSONObject: result, options: [.prettyPrinted, .sortedKeys])

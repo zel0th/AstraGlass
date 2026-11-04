@@ -22,9 +22,12 @@ struct AstraGlassApp: App {
             CommandGroup(replacing: .newItem) {
                 Button(L10n.text("Новая карта")) { model.newChart() }.keyboardShortcut("n")
                 Button(L10n.text("Открыть карту…")) { model.open() }.keyboardShortcut("o")
-                Button(L10n.text("Сохранить карту…")) { model.save() }.keyboardShortcut("s")
+                Button(L10n.text("Сохранить в базу", "Save to database")) { model.save() }.keyboardShortcut("s")
             }
             CommandMenu(L10n.text("Карта")) {
+                Button(L10n.text("Мои карты", "My charts")) { model.reloadCharts(); model.section = .savedCharts }
+                Button(L10n.text("Экспортировать карту в JSON…", "Export chart as JSON…")) { model.exportChart() }
+                Divider()
                 Button(L10n.text("Изменить данные…")) { model.edit() }.keyboardShortcut("e")
                 Button(L10n.text("Пересчитать")) { model.calculate() }.keyboardShortcut("r")
                 Divider()
@@ -55,14 +58,13 @@ struct WorkspaceView: View {
                     Spacer()
                 }.padding(.horizontal, 20).padding(.top, 21).padding(.bottom, 23)
                 List(selection: $model.section) {
-                    Section(L10n.text("Исследование")) { ForEach([AppSection.chart, .planets, .aspects]) { item in Label(L10n.text(item.rawValue), systemImage: item.symbol).tag(item) } }
+                    Section(L10n.text("Исследование")) { ForEach([AppSection.savedCharts, .chart, .planets, .aspects]) { item in Label(L10n.text(item.rawValue), systemImage: item.symbol).tag(item) } }
                     Section(L10n.text("Динамика")) { ForEach([AppSection.relationships, .transits, .reports, .graphics]) { item in Label(L10n.text(item.rawValue), systemImage: item.symbol).tag(item) } }
                     Section(L10n.text("Тексты")) { Label(L10n.text(AppSection.library.rawValue), systemImage: AppSection.library.symbol).tag(AppSection.library) }
                 }.listStyle(.sidebar)
                 VStack(alignment: .leading, spacing: 7) {
-                    Text(L10n.text("Авессалом Подводный")).font(.caption.weight(.medium))
-                    Text(L10n.text("Общая астрология")).font(.caption2).foregroundStyle(.secondary)
-                    Text(L10n.text("\(model.library?.records.count ?? 0) разделов · 4 книги", "\(model.library?.records.count ?? 0) sections · 4 books")).font(.caption2).foregroundStyle(.tertiary)
+                    Text(model.interpretationPack.title).font(.caption.weight(.medium))
+                    Text(L10n.text("\(model.library?.records.count ?? 0) разделов · \(model.library?.sources.count ?? 0) источников", "\(model.library?.records.count ?? 0) sections · \(model.library?.sources.count ?? 0) sources")).font(.caption2).foregroundStyle(.tertiary)
                     Divider().padding(.vertical, 5)
                     HStack { Circle().fill(.green).frame(width: 5, height: 5); Text(L10n.text("Astrolog 8.0 · локально")).font(.system(size: 10)).foregroundStyle(.secondary) }
                 }.padding(20).frame(maxWidth: .infinity, alignment: .leading)
@@ -70,6 +72,7 @@ struct WorkspaceView: View {
         } detail: {
             Group {
                 switch model.section ?? .chart {
+                case .savedCharts: SavedChartsView(model: model)
                 case .chart: ChartDashboard(model: model)
                 case .planets: PlanetTableView(model: model)
                 case .aspects: AspectTableView(model: model)
@@ -114,7 +117,7 @@ struct ChartDashboard: View {
                     if model.isCalculating { ProgressView().controlSize(.small).padding(.top, 12) }
                     else { Button { model.section = .planets } label: { Image(systemName: "list.bullet").padding(4) }.buttonStyle(.glass).help(L10n.text("Таблица положений")) }
                 }
-                if (model.title.hasPrefix("Пример") || model.title.hasPrefix("Example")) { Text(L10n.text("Демонстрационная карта: 1 января 2000, 12:00, Москва. Измените данные для своей карты.")).font(.caption).foregroundStyle(.secondary) }
+                if model.currentChartID == nil && model.input == ChartInput() && (model.title.hasPrefix("Пример") || model.title.hasPrefix("Example")) { Text(L10n.text("Демонстрационная карта: 1 января 2000, 12:00, Москва. Измените данные для своей карты.")).font(.caption).foregroundStyle(.secondary) }
                 if let snapshot = model.displaySnapshot {
                     ChartWheel(snapshot: snapshot, selectedPlanet: model.selectedPlanet, select: model.selectPlanet, selectSign: model.selectSign, selectAspect: model.selectAspect, selectedAspect: model.selectedAspect, selectedSign: model.selectedSign)
                         .frame(minHeight: 440, idealHeight: 520, maxHeight: 580)

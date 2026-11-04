@@ -20,3 +20,5 @@ Resources/profile-request.json
 *.xcuserstate
 Resources/Interpretations.json
 __pycache__/
+
+Resources/interpretations-*.json

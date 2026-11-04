@@ -23,10 +23,11 @@ app = pathlib.Path(sys.argv[1])
 resources = app / 'Contents' / 'Resources'
 corpus = resources / 'interpretations.json'
 if sys.argv[2] == '1':
-    data = json.loads(corpus.read_text())
-    assert data.get('records'), 'Empty interpretation corpus'
+    for included in resources.glob('interpretations*.json'):
+        data = json.loads(included.read_text())
+        assert data.get('records') and data.get('sources'), 'Empty interpretation corpus: ' + included.name
 else:
-    assert not corpus.exists(), 'Private texts in public package'
+    assert not list(resources.glob('interpretations*.json')), 'Private texts in public package'
 assert not (resources / 'profile-request.json').exists(), 'QA request in release'
 assert not list(app.rglob('*.docx')), 'Source books in package'
 PY

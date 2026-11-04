@@ -1,6 +1,6 @@
 # AstraGlass — continuation checkpoint
 
-Updated: 4 November 2026 (Moscow). Version: **0.2.0**.
+Updated: 4 November 2026 (Moscow). Version: **0.3.0** (packaging in progress).
 
 ## Repository and authorization
 - Continue `Share/Projects/AstraGlass`, not the older AstrologMac project.
@@ -50,3 +50,15 @@ bash scripts/package.sh --public
 - Native progressions, animation and Astrolog .as document import remain future work.
 - Ad-hoc signing only; Developer ID and notarization are not configured.
 - Keep this checkpoint under 100 lines and preserve evidence between continuations.
+
+## 0.3.0 feature milestone (current)
+- Added bundled Astronomicon-derived Unicode font, including traditional Pluto. All configured glyphs verified with CoreText.
+- City popover filters from first character; keyboard selection and actual Helsinki/time-zone update verified. Row identity regression fixed.
+- Two personal bundled corpora: Podvodny 823 sections / 4 sources; Txt3 27,349 sections / 300 sources, 7,887 natal bindings. Settings selection persists.
+- Txt3 importer preserves full source text and section codes; unsupported/non-natal sections stay searchable without false natal bindings.
+- Added 40 house-system explanations and tropical/sidereal help.
+- Added atomic JSON database with backup, autosave on Apply, update, search, reopen, second-chart opening and deletion. GUI saved/reopened a clearly named Helsinki demonstration chart.
+- Current checks: core 17, atlas 27, workspace 11, database 7, Txt3 importer 17; resource/font suite passed. PDF 18 pages with all 45 synthetic paragraphs passed. 302 locale keys match.
+- Personal runtime with Txt3 was observed at 419.91 MiB RSS and ps 0.0% CPU after interaction; this is one sample, not a controlled memory/CPU benchmark. Corpus load in native resource harness: 3.013 s.
+- Personal/public packages and source publication are the remaining steps. Native runtime is required for hdiutil.
+- Additional tests: bash scripts/test-database.sh; bash scripts/test-resources.sh.

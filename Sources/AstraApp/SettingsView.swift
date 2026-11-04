@@ -39,7 +39,12 @@ struct SettingsView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Text(L10n.text("Библиотека трактовок", "Interpretation library")).font(.headline)
                 Button(L10n.text("Импортировать библиотеку JSON…", "Import JSON library…")) { model.importLibrary() }
-                Text(L10n.text("Можно импортировать индекс interpretations.json, созданный из ваших документов Авессалома Подводного «Общая астрология». Он содержит главы о планетах, знаках, домах и аспектах с указанием источников. ZIP и DOCX сначала преобразуйте скриптом import-interpretations.py из проекта.", "Import an interpretations.json index made from your own copies of Avessalom Podvodny’s General Astrology. It contains chapters on planets, signs, houses and aspects with source references. Convert ZIP and DOCX files with the project's import-interpretations.py script first."))
+                Picker(L10n.text("Набор текстов", "Text collection"), selection: Binding(get: { model.interpretationPack }, set: { model.selectInterpretationPack($0) })) {
+                    ForEach(InterpretationPack.allCases) { pack in
+                        Text(pack.title + (pack.url == nil ? L10n.text(" · не установлен", " · not installed") : "")).tag(pack).disabled(pack.url == nil)
+                    }
+                }
+                Text(L10n.text("\(model.library?.records.count ?? 0) разделов из \(model.library?.sources.count ?? 0) источников. Выбранный набор используется в трактовках карты, библиотеке и PDF.", "\(model.library?.records.count ?? 0) sections from \(model.library?.sources.count ?? 0) sources. The selected collection is used in chart interpretations, the library and PDF."))
                     .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 Text(L10n.text("Авторские тексты сохраняются на языке оригинала. Язык интерфейса не переводит библиотеку и исходные отчёты Astrolog.", "Author texts stay in their original language. Interface language does not translate the library or Astrolog's original reports."))
                     .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
@@ -55,7 +60,7 @@ struct SettingsView: View {
                 ForEach(ChartPreferences.objectIDs, id: \.self) { id in
                     Toggle(isOn: objectBinding(id)) {
                         HStack(spacing: 8) {
-                            Text(AstroStyle.glyph(id)).font(AstroStyle.symbolFont(size: 20)).frame(width: 24)
+                            Text(AstroStyle.glyph(id)).font(AstroStyle.symbolFont(size: 20)).lineLimit(1).minimumScaleFactor(0.65).frame(width: 28)
                             Text(AstroStyle.name(id))
                         }
                     }.toggleStyle(.checkbox)
