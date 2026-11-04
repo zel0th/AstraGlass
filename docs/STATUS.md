@@ -1,6 +1,6 @@
 # AstraGlass — continuation checkpoint
 
-Updated: 5 November 2026 (Moscow). Version **0.3.3**.
+Updated: 5 November 2026 (Moscow). Version **0.3.4**.
 
 ## Repository and authorization
 - Continue this repository, not the old AstrologMac project.
@@ -18,26 +18,20 @@ Updated: 5 November 2026 (Moscow). Version **0.3.3**.
 - Txt3 remains retired: hidden from settings, excluded by build whitelist and package validators; original kept only in PrivateCorpus.
 - Responsive ChartDashboardLayout, proportional glyph scaling, bottom summary strip; inspector default 800, resizable 360–1200.
 
-## 0.3.3 requested changes
-- Conjunctions have separate visible blue ☌ buttons in the inner aspect field, with collision avoidance and leaders.
-- Exact conjunctions and the 359°/1° boundary remain selectable; button opens the existing aspect inspector.
-- Shared aspect palette: conjunction blue, trine green, square/opposition/semisquare/sesquisquare red, sextile teal.
-- Subtle annular house fills follow actual cusps; natural house elements repeat fire/earth/air/water (index % 4).
-- Editor month/day/hour use menu pickers; year/minute stay manual. Days use engine-compatible Julian/Gregorian leap rules.
-- Changing month/year clamps the day; imported invalid input is still rejected, never silently normalized.
-- Editor “Из библиотеки…” searches saved JSON records by title/place/date and loads every field into the draft.
-- Cancel leaves workspace/database untouched. Apply updates the explicitly loaded UUID rather than the previously open chart.
-- The saved-record chooser also works for the secondary chart. Loading an existing record is editing it, not cloning it.
+## 0.3.4 requested changes
+- IC added at MC + 180°, in the shared native wheel and exports.
+- Every painted house annulus is a button using the same Path for hit testing; actual unequal cusps and 0° wrap are preserved.
+- Selecting a house opens its existing inspector with house/cusp-sign passages and highlights the sector, border and number.
+- House buttons are below planets/signs/aspects; their content shape excludes the center and outer zodiac band. VoiceOver labels included.
+- Previous 0.3.3: selectable conjunction badges, shared aspect colors, house tints, calendar pickers and saved-chart editor chooser remain.
 
 ## Validation this milestone
-- Core: 18 groups with real engine; atlas: 27 checks. Workspace: 14 groups, including loaded UUID and primary/secondary isolation.
-- Resources: font/glyphs/colors, 10 independently spaced conjunctions at three chart sizes, 12 sectors including 0° wrap, calendar transitions, Podvodny 823/4.
-- PDF: 18 A4 pages, all 45 synthetic paragraphs and final Cyrillic marker, attribution/deduplication.
-- Localization: 302 matching keys, no missing static labels. git diff --check passed.
-- GUI: conjunction opens correct interpretation; house fills and colors visible; month/day/hour dropdowns, February 2000→2001 clamp, manual minutes checked.
-- GUI: saved-chart search and Enter load restore automatic UTC; Cancel restores previous chart without applying draft.
-- Both DMG/ZIP packages passed signatures, readonly mount and relocated engine checks; public corpus absent, personal Podvodny only.
-- Evidence: docs/validation/distribution-0.3.3.json. Release target: https://github.com/zel0th/AstraGlass/releases/tag/v0.3.3
+- Workspace: 15 groups with real engine, including all 12 house selections, matching passages and switching back to a planet.
+- Resources: fonts/colors/conjunctions/calendar; exclusive hit regions for 12 unequal houses at multiple interior points, 0° wrap, center/zodiac exclusions; texts for all houses/signs.
+- GUI: IC visible opposite MC; empty areas of houses 4 and 6 open matching texts and show sector selection; Sun, Gemini and conjunction still selectable.
+- PDF: 18 A4 pages, all 45 paragraphs preserved; localization: 302 matching keys; diff check clean.
+- Both packages passed signatures, readonly DMG mount and relocated engine checks; public corpus absent, personal Podvodny only.
+- Evidence: docs/validation/distribution-0.3.4.json. Release target: https://github.com/zel0th/AstraGlass/releases/tag/v0.3.4
 
 ## Reproduce
 ```sh

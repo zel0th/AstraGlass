@@ -49,6 +49,26 @@ struct ResourceTests {
             precondition(!sector.contains(ChartWheelGeometry.point(start + 35, asc: 350, radius: 262 * 0.7, center: center)))
         }
         var date = ChartInput(year: 2024, month: 1, day: 31, hour: 23, minute: 59)
+        // Hit regions must partition unequal houses, including the Aries wrap,
+        // and leave both the aspect field and zodiac band available to other buttons.
+        let cusps = [352.0, 14, 39, 84, 128, 155, 172, 194, 219, 264, 308, 335]
+        let sectors = cusps.indices.map { index in
+            ChartWheelGeometry.houseSector(start: cusps[index], end: cusps[(index + 1) % 12], asc: 352, radius: 262, center: center)
+        }
+        for index in cusps.indices {
+            let span = (cusps[(index + 1) % 12] - cusps[index] + 360).truncatingRemainder(dividingBy: 360)
+            for fraction in [0.1, 0.5, 0.9] {
+                let longitude = cusps[index] + span * fraction
+                for lane in [0.59, 0.7, 0.82] {
+                    let location = ChartWheelGeometry.point(longitude, asc: 352, radius: 262 * lane, center: center)
+                    precondition(sectors.indices.filter { sectors[$0].contains(location) } == [index])
+                }
+                for lane in [0.5, 0.93] {
+                    let location = ChartWheelGeometry.point(longitude, asc: 352, radius: 262 * lane, center: center)
+                    precondition(sectors.allSatisfy { !$0.contains(location) })
+                }
+            }
+        }
         date.setCalendarField(\.month, to: 2)
         precondition(date.day == 29 && date.hour == 23 && date.minute == 59)
         date.setCalendarField(\.year, to: 2025)
@@ -67,8 +87,11 @@ struct ResourceTests {
             precondition(library.sources.count == 4 && library.records.count == 823)
             precondition(library.records.allSatisfy { InterpretationLibrary.isRussianText($0.body) })
             precondition(!library.forPlanet(id: 1, sign: 9, house: 10).isEmpty)
+            for house in 1...12 {
+                for sign in 0..<12 { precondition(!library.forHouse(number: house, sign: sign).isEmpty) }
+            }
             print("Podvodny: 823 sections / 4 sources; retired collection unavailable")
         }
-        print("Resources: bundled glyphs, object/aspect colors, 10 separate conjunction targets, 12 house sectors, calendar transitions, 40 house descriptions verified")
+        print("Resources: bundled glyphs, object/aspect colors, 10 separate conjunction targets, 12 exclusive house hit regions, calendar transitions, 40 house-system descriptions verified")
     }
 }

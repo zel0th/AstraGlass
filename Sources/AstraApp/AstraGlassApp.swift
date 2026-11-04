@@ -128,7 +128,7 @@ struct ChartDashboard: View {
                 if model.currentChartID == nil && model.input == ChartInput() && (model.title.hasPrefix("Пример") || model.title.hasPrefix("Example")) { Text(L10n.text("Демонстрационная карта: 1 января 2000, 12:00, Москва. Измените данные для своей карты.")).font(.caption).foregroundStyle(.secondary) }
                 }
                 if let snapshot = model.displaySnapshot {
-                    ChartWheel(snapshot: snapshot, selectedPlanet: model.selectedPlanet, select: model.selectPlanet, selectSign: model.selectSign, selectAspect: model.selectAspect, selectedAspect: model.selectedAspect, selectedSign: model.selectedSign)
+                    ChartWheel(snapshot: snapshot, selectedPlanet: model.selectedPlanet, select: model.selectPlanet, selectSign: model.selectSign, selectAspect: model.selectAspect, selectHouse: model.selectHouse, selectedAspect: model.selectedAspect, selectedSign: model.selectedSign, selectedHouse: model.selectedHouse)
                     VStack(alignment: .leading, spacing: 20) {
                     HStack(spacing: 0) {
                         chartMetric(L10n.text("СОЛНЦЕ"), value: signSummary(snapshot, planet: 1))
@@ -140,7 +140,7 @@ struct ChartDashboard: View {
                     if !model.unavailableObjectNames.isEmpty {
                         Text(L10n.text("Недоступны без дополнительных эфемерид: ", "Additional ephemerides required: ") + model.unavailableObjectNames.joined(separator: ", ")).font(.caption).foregroundStyle(.secondary)
                     }
-                    HStack { Text(L10n.text("Выберите планету, знак или линию аспекта для трактовки")); Spacer(); Text(String(format: L10n.text("Расчёт %.0f мс"), model.lastCalculation * 1000)) }.font(.caption2).foregroundStyle(.tertiary)
+                    HStack { Text(L10n.text("Выберите планету, знак, область дома или аспект для трактовки", "Select a planet, sign, house area or aspect for interpretation")); Spacer(); Text(String(format: L10n.text("Расчёт %.0f мс"), model.lastCalculation * 1000)) }.font(.caption2).foregroundStyle(.tertiary)
                     }
                 } else {
                     EmptyPanel(title: model.isCalculating ? L10n.text("Рассчитываем карту") : L10n.text("Карта не рассчитана"), description: L10n.text("Укажите дату, местное время и координаты в данных карты."))

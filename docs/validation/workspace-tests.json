@@ -13,9 +13,10 @@
     "Unavailable interpretation collections are absent from the picker and stale selections are harmless",
     "JSON database autosave, update without duplicates, relaunch, recalculation and second-chart reopen",
     "Whole database import\/export, refreshed list, imported chart calculation and duplicate-free reimport",
-    "Editor library load preserves record identity, avoids overwriting another chart, supports second chart; conjunction inspector selection"
+    "Editor library load preserves record identity, avoids overwriting another chart, supports second chart; conjunction inspector selection",
+    "All twelve houses open the inspector with matching passages; planet selection clears house selection"
   ],
   "failed" : 0,
-  "passed" : 14,
-  "timestamp" : "2026-11-04T21:30:12Z"
+  "passed" : 15,
+  "timestamp" : "2026-11-04T22:14:56Z"
 }

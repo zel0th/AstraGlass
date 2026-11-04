@@ -1,0 +1,43 @@
+{
+  "version": "0.3.4",
+  "platform": "macOS 27.2 arm64",
+  "checks": {
+    "adHocSignatures": true,
+    "readonlyDMGMounts": true,
+    "embeddedAstrolog": true,
+    "relocatedNatalSynastryGraphics": true,
+    "txt3Absent": true,
+    "publicCorpusAbsent": true,
+    "personalPodvodny": true,
+    "icOppositeMCUI": true,
+    "houseAreaSelectionUI": true,
+    "selectedHouseHighlightUI": true,
+    "planetSignConjunctionSelectionUI": true,
+    "unequalHouseHitRegions": 12,
+    "workspaceGroups": 15,
+    "pdfPages": 18,
+    "localizationKeys": 302
+  },
+  "assets": [
+    {
+      "name": "AstraGlass-0.3.4-macOS-arm64.dmg",
+      "size": 4451191,
+      "sha256": "f4a8ca3d9bb7c05335ce3b9ef8a824ded1c0d6151ba4c02c06607ee98b29e1b2"
+    },
+    {
+      "name": "AstraGlass-0.3.4-macOS-arm64.zip",
+      "size": 4116535,
+      "sha256": "a1120c1aaa38e3e698d3e0624c608c27b0368311823217f651853097aa8a4313"
+    },
+    {
+      "name": "AstraGlass-0.3.4-macOS-arm64-personal.dmg",
+      "size": 6158380,
+      "sha256": "22570aec28797510bf0770fed56e617e8d25e653ae339ffc7a0326ad8b85270d"
+    },
+    {
+      "name": "AstraGlass-0.3.4-macOS-arm64-personal.zip",
+      "size": 5290167,
+      "sha256": "ca109ddca8993757016f22045b9164351249b9c6485559e337a611ad89e5d19c"
+    }
+  ]
+}

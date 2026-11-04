@@ -236,6 +236,29 @@ struct WorkspaceTests {
                         "Conjunction selection must open its aspect inspector")
             checks.append("Editor library load preserves record identity, avoids overwriting another chart, supports second chart; conjunction inspector selection")
 
+            try await waitUntilFinished { reopenedModel.isCalculating }
+            let corpusURL = root.appendingPathComponent("Resources/interpretations.json")
+            if FileManager.default.fileExists(atPath: corpusURL.path) {
+                reopenedModel.library = try InterpretationLibrary(url: corpusURL)
+            }
+            for house in 1...12 {
+                reopenedModel.selectSign(3)
+                reopenedModel.selectAspect(exactConjunction)
+                reopenedModel.showInspector = false
+                reopenedModel.selectHouse(house)
+                try require(reopenedModel.selectedHouse == house && reopenedModel.selectedSign == nil
+                            && reopenedModel.selectedAspect == nil && reopenedModel.showInspector,
+                            "Selecting any house must open its inspector and clear competing selections")
+                if let library = reopenedModel.library, let cusps = reopenedModel.snapshot?.houseCusps {
+                    let expected = library.forHouse(number: house, sign: AstroStyle.sign(cusps[house - 1]))
+                    try require(!expected.isEmpty && reopenedModel.relevantPassages.map(\.id) == expected.map(\.id),
+                                "House inspector must display the selected house and actual cusp-sign passages")
+                }
+                reopenedModel.selectPlanet(1)
+                try require(reopenedModel.selectedHouse == nil, "Planet selection must leave the house inspector")
+            }
+            checks.append("All twelve houses open the inspector with matching passages; planet selection clears house selection")
+
             let result: [String: Any] = ["passed": checks.count, "failed": 0, "checks": checks,
                                          "timestamp": ISO8601DateFormatter().string(from: Date())]
             let data = try JSONSerialization.data(withJSONObject: result, options: [.prettyPrinted, .sortedKeys])

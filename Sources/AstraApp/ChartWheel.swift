@@ -8,17 +8,21 @@ struct ChartWheel: View {
     let select: (Int) -> Void
     let selectSign: (Int) -> Void
     let selectAspect: (ChartAspect) -> Void
+    let selectHouse: (Int) -> Void
     let selectedAspect: ChartAspect?
     let selectedSign: Int?
+    let selectedHouse: Int?
     @Environment(\.colorScheme) private var colorScheme
 
     init(snapshot: ChartSnapshot, selectedPlanet: Int, select: @escaping (Int) -> Void,
          selectSign: @escaping (Int) -> Void = { _ in },
          selectAspect: @escaping (ChartAspect) -> Void = { _ in },
-         selectedAspect: ChartAspect? = nil, selectedSign: Int? = nil) {
+         selectHouse: @escaping (Int) -> Void = { _ in },
+         selectedAspect: ChartAspect? = nil, selectedSign: Int? = nil, selectedHouse: Int? = nil) {
         self.snapshot = snapshot; self.selectedPlanet = selectedPlanet; self.select = select
         self.selectSign = selectSign; self.selectAspect = selectAspect
         self.selectedAspect = selectedAspect; self.selectedSign = selectedSign
+        self.selectHouse = selectHouse; self.selectedHouse = selectedHouse
     }
 
     private var asc: Double { snapshot.houseCusps.first ?? 0 }
@@ -43,6 +47,25 @@ struct ChartWheel: View {
                 Canvas { context, _ in
                     drawWheel(context: &context, center: center, radius: radius, markers: markers, conjunctions: conjunctions)
                 }.allowsHitTesting(false).accessibilityHidden(true)
+
+                // Reuse the painted annulus for hit testing. Later layers keep
+                // planets, signs and aspects independently selectable.
+                ForEach(snapshot.houseCusps.indices, id: \.self) { index in
+                    let sector = ChartWheelGeometry.houseSector(
+                        start: snapshot.houseCusps[index],
+                        end: snapshot.houseCusps[(index + 1) % snapshot.houseCusps.count],
+                        asc: asc, radius: radius, center: center)
+                    Button { selectHouse(index + 1) } label: {
+                        sector.fill(Color.clear)
+                            .frame(width: geometry.size.width, height: geometry.size.height)
+                            .contentShape(sector)
+                    }
+                    .buttonStyle(.plain)
+                    .help(L10n.text("Трактовка \(index + 1) дома", "House \(index + 1) interpretation"))
+                    .accessibilityLabel(L10n.text("Дом \(index + 1)", "House \(index + 1)"))
+                    .accessibilityHint(L10n.text("Открыть описание дома", "Open the house description"))
+                    .accessibilityAddTraits(selectedHouse == index + 1 ? .isSelected : [])
+                }
 
                 // A generous transparent corridor follows each real aspect line.
                 // Its button is also independently reachable with accessibility.
@@ -132,7 +155,11 @@ struct ChartWheel: View {
             let sector = ChartWheelGeometry.houseSector(start: cusp, end: next, asc: asc, radius: radius, center: center)
             // Natural house elements: 1/5/9 fire, 2/6/10 earth,
             // 3/7/11 air, 4/8/12 water, independent of the cusp's sign.
-            context.fill(sector, with: .color(AstroStyle.elementColors[index % 4].opacity(colorScheme == .dark ? 0.09 : 0.07)))
+            let selected = selectedHouse == index + 1
+            context.fill(sector, with: .color(AstroStyle.elementColors[index % 4].opacity(selected ? 0.22 : colorScheme == .dark ? 0.09 : 0.07)))
+            if selected {
+                context.stroke(sector, with: .color(AstroStyle.elementColors[index % 4].opacity(0.65)), lineWidth: 1.4)
+            }
         }
         for scale in [1.0, 0.85, 0.56] {
             let r = radius * scale
@@ -151,7 +178,7 @@ struct ChartWheel: View {
             context.stroke(path, with: .color(ink), lineWidth: index % 3 == 0 ? 1.3 : 0.7)
             let next = snapshot.houseCusps[(index + 1) % snapshot.houseCusps.count]
             let middle = cusp + ((next - cusp + 360).truncatingRemainder(dividingBy: 360)) / 2
-            context.draw(Text("\(index + 1)").font(.system(size: 9 * labelScale)).foregroundStyle(.secondary), at: point(middle, radius: radius * 0.58, center: center))
+            context.draw(Text("\(index + 1)").font(.system(size: 9 * labelScale, weight: selectedHouse == index + 1 ? .bold : .regular)).foregroundStyle(selectedHouse == index + 1 ? AstroStyle.elementColors[index % 4] : .secondary), at: point(middle, radius: radius * 0.58, center: center))
         }
         for aspect in visibleAspects {
             guard let pair = aspectEndpoints(aspect, radius: radius, center: center) else { continue }
@@ -168,7 +195,10 @@ struct ChartWheel: View {
             context.draw(Text(label).font(.system(size: 9 * labelScale, weight: .bold)).foregroundStyle(AstroStyle.accent), at: point(longitude, radius: radius + 15 * labelScale, center: center))
         }
         if snapshot.houseCusps.indices.contains(9) {
-            context.draw(Text("MC").font(.system(size: 9 * labelScale, weight: .bold)).foregroundStyle(AstroStyle.accent), at: point(snapshot.houseCusps[9], radius: radius + 13 * labelScale, center: center))
+            let mc = snapshot.houseCusps[9]
+            for (label, longitude) in [("MC", mc), ("IC", mc + 180)] {
+                context.draw(Text(label).font(.system(size: 9 * labelScale, weight: .bold)).foregroundStyle(AstroStyle.accent), at: point(longitude, radius: radius + 13 * labelScale, center: center))
+            }
         }
         for planet in visiblePlanets {
             let pointOnRing = point(planet.longitude, radius: radius * 0.85, center: center)
