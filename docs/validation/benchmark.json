@@ -1,0 +1,32 @@
+{
+  "checksum": 18275.409406443498,
+  "max_ms": 101.429625,
+  "mean_ms": 36.52748499000001,
+  "median_ms": 35.18075,
+  "p95_ms": 49.098292,
+  "requests": 100,
+  "scenario": "100 serial Swift adapter calculations; fresh Astrolog process per chart; varying dates and time zones",
+  "wall_seconds": 3.652902667,
+  "outer_wall_seconds": 3.708225084,
+  "user_cpu_seconds": 0.588375,
+  "system_cpu_seconds": 0.846456,
+  "average_cpu_percent_of_one_core": 38.69320139683301,
+  "peak_resident_bytes": 13565952,
+  "peak_resident_mib": 12.9375,
+  "rss_scope": "Darwin RUSAGE_CHILDREN peak RSS from an isolated worker that launches only the Swift harness; not simultaneous aggregate memory",
+  "cpu_scope": "resource RUSAGE_CHILDREN delta for waited harness and its waited engine children",
+  "metadata": {
+    "timestamp_utc": "2026-11-04T19:03:58.796661+00:00",
+    "os": "ProductName:\t\tmacOS\nProductVersion:\t\t27.2\nBuildVersion:\t\t26B123",
+    "architecture": "arm64",
+    "cpu": "Unavailable in execution sandbox",
+    "physical_memory_bytes": "Unavailable in execution sandbox",
+    "python_version": "3.9.6",
+    "swift": "Apple Swift version 6.4.2 (swiftlang-6.4.2.1.9 clang-2100.4.1.1)\nTarget: arm64-apple-macosx27.2.0"
+  },
+  "limitations": [
+    "Measures calculation path only; GUI idle and interaction require separate app sampling.",
+    "No statistical claim about all hardware or long sessions.",
+    "Peak RSS is not a memory-leak test or total memory pressure."
+  ]
+}

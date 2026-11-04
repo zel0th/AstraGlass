@@ -1,0 +1,16 @@
+{
+  "benchmark": {
+    "checksum": 18275.409406443498,
+    "max_ms": 101.429625,
+    "mean_ms": 36.52748499000001,
+    "median_ms": 35.18075,
+    "p95_ms": 49.098292,
+    "requests": 100,
+    "scenario": "100 serial Swift adapter calculations; fresh Astrolog process per chart; varying dates and time zones",
+    "wall_seconds": 3.652902667
+  },
+  "worker_wall_seconds": 3.671464042,
+  "user_cpu_seconds": 0.588375,
+  "system_cpu_seconds": 0.846456,
+  "peak_resident_bytes": 13565952
+}

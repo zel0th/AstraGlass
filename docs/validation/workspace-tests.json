@@ -1,0 +1,17 @@
+{
+  "checks" : [
+    "Second-chart file import preserves place, title, coordinates and visible UTC offset",
+    "Invalid dates and unsupported chart versions are rejected before modifying workspace data",
+    "Monthly transits use the secondary UTC offset and preserve natal chart time",
+    "Graphic export name belongs to rendered preset, not current picker selection",
+    "Primary input changes invalidate chart, report, graphic, and export metadata",
+    "Pending primary calculations cannot republish after input changes",
+    "Secondary changes cancel dependent results while preserving the natal chart",
+    "Failed replacement reports never expose previous content under a new title",
+    "Graphic captions capture both titles and are invalidated when either changes",
+    "Settings invalidate stale results, filter the actual engine snapshot and persist"
+  ],
+  "failed" : 0,
+  "passed" : 10,
+  "timestamp" : "2026-11-04T19:06:15Z"
+}

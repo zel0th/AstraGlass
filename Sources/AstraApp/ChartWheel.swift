@@ -1,0 +1,204 @@
+import SwiftUI
+
+/// The snapshot has already been filtered by the user's object/aspect settings.
+/// Buttons are separate from the drawing, preserving keyboard/VoiceOver access.
+struct ChartWheel: View {
+    let snapshot: ChartSnapshot
+    let selectedPlanet: Int
+    let select: (Int) -> Void
+    let selectSign: (Int) -> Void
+    let selectAspect: (ChartAspect) -> Void
+    let selectedAspect: ChartAspect?
+    let selectedSign: Int?
+    @Environment(\.colorScheme) private var colorScheme
+
+    init(snapshot: ChartSnapshot, selectedPlanet: Int, select: @escaping (Int) -> Void,
+         selectSign: @escaping (Int) -> Void = { _ in },
+         selectAspect: @escaping (ChartAspect) -> Void = { _ in },
+         selectedAspect: ChartAspect? = nil, selectedSign: Int? = nil) {
+        self.snapshot = snapshot; self.selectedPlanet = selectedPlanet; self.select = select
+        self.selectSign = selectSign; self.selectAspect = selectAspect
+        self.selectedAspect = selectedAspect; self.selectedSign = selectedSign
+    }
+
+    private var asc: Double { snapshot.houseCusps.first ?? 0 }
+    private var visiblePlanets: [PlanetPosition] { snapshot.positions }
+    private var positionsByID: [Int: PlanetPosition] {
+        Dictionary(snapshot.positions.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+    }
+    private var visibleAspects: [ChartAspect] {
+        let ids = Set(snapshot.positions.map(\.id))
+        return snapshot.aspects.filter { ids.contains($0.first) && ids.contains($0.second) }
+    }
+
+    var body: some View {
+        GeometryReader { geometry in
+            let center = CGPoint(x: geometry.size.width / 2, y: geometry.size.height / 2)
+            let radius = max(1, min(geometry.size.width, geometry.size.height) / 2 - 28)
+            let markers = markerPositions(radius: radius, center: center)
+            ZStack {
+                Canvas { context, _ in
+                    drawWheel(context: &context, center: center, radius: radius, markers: markers)
+                }.allowsHitTesting(false).accessibilityHidden(true)
+
+                // A generous transparent corridor follows each real aspect line.
+                // Its button is also independently reachable with accessibility.
+                ForEach(visibleAspects) { aspect in
+                    if let pair = aspectEndpoints(aspect, radius: radius, center: center) {
+                        let frame = segmentFrame(pair.0, pair.1)
+                        let start = CGPoint(x: pair.0.x - frame.minX, y: pair.0.y - frame.minY)
+                        let end = CGPoint(x: pair.1.x - frame.minX, y: pair.1.y - frame.minY)
+                        Button { selectAspect(aspect) } label: {
+                            AspectHitShape(start: start, end: end)
+                                .fill(Color.clear)
+                                .frame(width: frame.width, height: frame.height)
+                                .contentShape(AspectHitShape(start: start, end: end))
+                        }
+                        .buttonStyle(.plain)
+                        .position(x: frame.midX, y: frame.midY)
+                        .help(aspectDescription(aspect))
+                        .accessibilityLabel(aspectDescription(aspect))
+                        .accessibilityHint(L10n.text("Открыть трактовку аспекта", "Open the aspect interpretation"))
+                    }
+                }
+
+                ForEach(0..<12, id: \.self) { sign in
+                    Button { selectSign(sign) } label: {
+                        Text(AstroStyle.signGlyphs[sign])
+                            .font(AstroStyle.symbolFont(size: max(17, radius * 0.09)))
+                            .foregroundStyle(AstroStyle.elementColors[sign % 4])
+                            .frame(width: max(26, radius * 0.13), height: max(26, radius * 0.13))
+                            .background(selectedSign == sign ? AstroStyle.accent.opacity(0.14) : Color.clear, in: Circle())
+                            .contentShape(Circle())
+                    }
+                    .buttonStyle(.plain)
+                    .position(point(Double(sign * 30 + 15), radius: radius * 0.925, center: center))
+                    .help(AstroStyle.signNames[sign])
+                    .accessibilityLabel(AstroStyle.signNames[sign])
+                    .accessibilityHint(L10n.text("Открыть описание знака", "Open the zodiac sign description"))
+                }
+
+                ForEach(visiblePlanets) { planet in
+                    Button { select(planet.id) } label: {
+                        VStack(spacing: 0) {
+                            Text(AstroStyle.glyph(planet.id)).font(AstroStyle.symbolFont(size: min(25, max(18, radius * 0.11))))
+                            Text("\(Int(planet.degreeInSign))°" + (planet.isRetrograde ? " ℞" : ""))
+                                .font(.system(size: 8, weight: .medium))
+                        }
+                        .foregroundStyle(planet.id == selectedPlanet ? AstroStyle.accent : Color.primary)
+                        .frame(width: 32, height: 38)
+                        .background(planet.id == selectedPlanet ? AstroStyle.accent.opacity(0.12) : Color.clear, in: RoundedRectangle(cornerRadius: 9))
+                        .contentShape(RoundedRectangle(cornerRadius: 9))
+                    }
+                    .buttonStyle(.plain)
+                    .position(markers[planet.id] ?? point(planet.longitude, radius: radius * 0.76, center: center))
+                    .help(planetDescription(planet))
+                    .accessibilityLabel(planetDescription(planet))
+                    .accessibilityHint(L10n.text("Открыть трактовку планеты", "Open the object interpretation"))
+                }
+            }
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(L10n.text("Зодиакальный круг", "Zodiac chart"))
+    }
+
+    private func drawWheel(context: inout GraphicsContext, center: CGPoint, radius: CGFloat, markers: [Int: CGPoint]) {
+        let ink = Color.primary.opacity(colorScheme == .dark ? 0.22 : 0.14)
+        for scale in [1.0, 0.85, 0.56] {
+            let r = radius * scale
+            context.stroke(Path(ellipseIn: CGRect(x: center.x-r, y: center.y-r, width: 2*r, height: 2*r)), with: .color(ink), lineWidth: scale == 1 ? 1.3 : 0.7)
+        }
+        for degree in stride(from: 0, to: 360, by: 5) {
+            let p1 = point(Double(degree), radius: radius * (degree % 30 == 0 ? 0.85 : degree % 10 == 0 ? 0.97 : 0.985), center: center)
+            let p2 = point(Double(degree), radius: radius, center: center)
+            var path = Path(); path.move(to: p1); path.addLine(to: p2)
+            context.stroke(path, with: .color(ink), lineWidth: degree % 30 == 0 ? 1 : 0.6)
+        }
+        for (index, cusp) in snapshot.houseCusps.enumerated() {
+            var path = Path()
+            path.move(to: point(cusp, radius: radius * 0.56, center: center))
+            path.addLine(to: point(cusp, radius: radius * 0.85, center: center))
+            context.stroke(path, with: .color(ink), lineWidth: index % 3 == 0 ? 1.3 : 0.7)
+            let next = snapshot.houseCusps[(index + 1) % snapshot.houseCusps.count]
+            let middle = cusp + ((next - cusp + 360).truncatingRemainder(dividingBy: 360)) / 2
+            context.draw(Text("\(index + 1)").font(.system(size: 9)).foregroundStyle(.secondary), at: point(middle, radius: radius * 0.58, center: center))
+        }
+        for aspect in visibleAspects {
+            guard let pair = aspectEndpoints(aspect, radius: radius, center: center) else { continue }
+            let selected = selectedAspect?.id == aspect.id
+            let highlighted = selected || selectedPlanet == 0 || aspect.first == selectedPlanet || aspect.second == selectedPlanet
+            var path = Path(); path.move(to: pair.0); path.addLine(to: pair.1)
+            context.stroke(path, with: .color(AstroStyle.aspectColor(aspect.angle).opacity(selected ? 1 : highlighted ? 0.65 : 0.20)), style: StrokeStyle(lineWidth: selected ? 2.8 : highlighted ? 1.3 : 0.8, dash: Int(aspect.angle) == 180 ? [4, 3] : []))
+        }
+        for (label, longitude) in [("ASC", asc), ("DSC", asc + 180)] {
+            context.draw(Text(label).font(.system(size: 9, weight: .bold)).foregroundStyle(AstroStyle.accent), at: point(longitude, radius: radius + 15, center: center))
+        }
+        if snapshot.houseCusps.indices.contains(9) {
+            context.draw(Text("MC").font(.system(size: 9, weight: .bold)).foregroundStyle(AstroStyle.accent), at: point(snapshot.houseCusps[9], radius: radius + 13, center: center))
+        }
+        for planet in visiblePlanets {
+            let pointOnRing = point(planet.longitude, radius: radius * 0.85, center: center)
+            if let marker = markers[planet.id] {
+                var leader = Path(); leader.move(to: pointOnRing); leader.addLine(to: marker)
+                context.stroke(leader, with: .color(ink), lineWidth: 0.6)
+            }
+            context.fill(Path(ellipseIn: CGRect(x: pointOnRing.x-2, y: pointOnRing.y-2, width: 4, height: 4)), with: .color(planet.id == selectedPlanet ? AstroStyle.accent : .secondary))
+        }
+    }
+
+    private func point(_ longitude: Double, radius: CGFloat, center: CGPoint) -> CGPoint {
+        let angle = (180 + asc - longitude) * Double.pi / 180
+        return CGPoint(x: center.x + cos(angle) * radius, y: center.y + sin(angle) * radius)
+    }
+
+    /// Keep labels apart when extra points or a tight conjunction are enabled.
+    /// Leader lines preserve the exact calculated longitude on the outer ring.
+    private func markerPositions(radius: CGFloat, center: CGPoint) -> [Int: CGPoint] {
+        var placed: [Int: CGPoint] = [:]
+        for planet in visiblePlanets.sorted(by: { $0.longitude == $1.longitude ? $0.id < $1.id : $0.longitude < $1.longitude }) {
+            var candidates: [CGPoint] = []
+            for shift in [0.0, 4, -4, 8, -8, 12, -12, 16, -16] {
+                for lane in [0.76, 0.66] {
+                    candidates.append(point(planet.longitude + shift, radius: radius * lane, center: center))
+                }
+            }
+            let chosen = candidates.first { candidate in
+                placed.values.allSatisfy { hypot($0.x - candidate.x, $0.y - candidate.y) >= 36 }
+            } ?? candidates.max { a, b in
+                minimumDistance(a, to: Array(placed.values)) < minimumDistance(b, to: Array(placed.values))
+            } ?? point(planet.longitude, radius: radius * 0.76, center: center)
+            placed[planet.id] = chosen
+        }
+        return placed
+    }
+
+    private func minimumDistance(_ point: CGPoint, to others: [CGPoint]) -> CGFloat {
+        others.map { hypot($0.x - point.x, $0.y - point.y) }.min() ?? .greatestFiniteMagnitude
+    }
+    private func aspectEndpoints(_ aspect: ChartAspect, radius: CGFloat, center: CGPoint) -> (CGPoint, CGPoint)? {
+        guard let first = positionsByID[aspect.first], let second = positionsByID[aspect.second] else { return nil }
+        return (point(first.longitude, radius: radius * 0.55, center: center), point(second.longitude, radius: radius * 0.55, center: center))
+    }
+    private func segmentFrame(_ first: CGPoint, _ second: CGPoint) -> CGRect {
+        CGRect(x: min(first.x, second.x) - 7, y: min(first.y, second.y) - 7,
+               width: abs(first.x - second.x) + 14, height: abs(first.y - second.y) + 14)
+    }
+    private func aspectDescription(_ aspect: ChartAspect) -> String {
+        "\(AstroStyle.name(aspect.first)) · \(AstroStyle.aspectName(aspect.angle)) · \(AstroStyle.name(aspect.second))"
+    }
+    private func planetDescription(_ planet: PlanetPosition) -> String {
+        "\(AstroStyle.name(planet.id)) · \(AstroStyle.signNames[planet.sign]) \(AstroStyle.position(planet.longitude)) · " + L10n.text("дом", "house") + " \(planet.house)"
+    }
+}
+
+private struct AspectHitShape: Shape {
+    let start: CGPoint
+    let end: CGPoint
+    func path(in rect: CGRect) -> Path {
+        if hypot(end.x-start.x, end.y-start.y) < 2 {
+            return Path(ellipseIn: CGRect(x: start.x-7, y: start.y-7, width: 14, height: 14))
+        }
+        var path = Path(); path.move(to: start); path.addLine(to: end)
+        return path.strokedPath(StrokeStyle(lineWidth: 14, lineCap: .round))
+    }
+}

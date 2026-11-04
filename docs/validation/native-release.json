@@ -1,0 +1,31 @@
+{
+  "version": "0.2.0",
+  "platform": "macOS 27.2 arm64",
+  "swift": "6.4.2",
+  "core_groups": 17,
+  "city_checks": 27,
+  "workspace_groups": 10,
+  "bundle_checks": 6,
+  "engine_preference_groups": 6,
+  "pdf": {
+    "pages": 18,
+    "format": "A4",
+    "paragraphs_preserved": 45,
+    "final_cyrillic_marker": true,
+    "deduplication": true,
+    "visually_reviewed_pages": [
+      1,
+      2,
+      3,
+      18
+    ]
+  },
+  "ui_observed": [
+    "Natal chart calculated with bundled engine",
+    "Settings: General, Planets and points, Aspects"
+  ],
+  "ui_limitations": [
+    "Full English-language interaction walkthrough not completed"
+  ],
+  "timestamp_utc": "2026-11-04T19:06:12.953057+00:00"
+}

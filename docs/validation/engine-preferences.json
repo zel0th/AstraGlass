@@ -1,0 +1,24 @@
+{
+  "passed": 6,
+  "failed": 0,
+  "checks": [
+    "Both lunar nodes are available and exactly opposite",
+    "Charon either has ephemeris data or is explicitly unavailable; no fabricated point",
+    "All 24 major/minor aspect switches, disable-all, and angular orbs",
+    "Textual positions obey selected objects",
+    "Synastry runs with selected objects and aspects",
+    "All eleven graphics modes produce nonempty valid-size BMPs with preferences"
+  ],
+  "engine": "Astrolog 8.00",
+  "platform": "Darwin",
+  "scope": "Actual C++ engine; does not validate macOS SwiftUI or Swift adapter",
+  "unavailable_objects": [
+    11,
+    12,
+    13,
+    14,
+    15,
+    74
+  ],
+  "timestamp": "2026-11-04T19:02:29.274687+00:00"
+}

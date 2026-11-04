@@ -1,0 +1,483 @@
+{
+  "average_cpu_percent_of_one_core" : 0.19375486742189388,
+  "delay_before_sampling_seconds" : 8,
+  "duration_seconds" : 30.010084791,
+  "final_resident_bytes" : 197230592,
+  "initial_resident_bytes" : 183074816,
+  "label" : "background-idle",
+  "logical_processor_count" : 10,
+  "maximum_sampled_resident_bytes" : 197754880,
+  "os_version" : "Версия 27.2 (Выпуск 26B123)",
+  "peak_resident_bytes_since_launch" : 220250112,
+  "pid" : 88362,
+  "sample_interval_seconds" : 0.5,
+  "samples" : [
+    {
+      "elapsed_seconds" : 0,
+      "peak_resident_bytes" : 186597376,
+      "resident_bytes" : 183074816,
+      "system_cpu_seconds" : 0.078945,
+      "user_cpu_seconds" : 0.866538
+    },
+    {
+      "cpu_percent_since_previous" : 0.027118066925825447,
+      "elapsed_seconds" : 0.538386458,
+      "peak_resident_bytes" : 186597376,
+      "resident_bytes" : 183074816,
+      "system_cpu_seconds" : 0.079022,
+      "user_cpu_seconds" : 0.866607
+    },
+    {
+      "cpu_percent_since_previous" : 0.03371848605133511,
+      "elapsed_seconds" : 1.087046916,
+      "peak_resident_bytes" : 186597376,
+      "resident_bytes" : 183074816,
+      "system_cpu_seconds" : 0.079123,
+      "user_cpu_seconds" : 0.866691
+    },
+    {
+      "cpu_percent_since_previous" : 0.030021763485961066,
+      "elapsed_seconds" : 1.636648208,
+      "peak_resident_bytes" : 186597376,
+      "resident_bytes" : 183074816,
+      "system_cpu_seconds" : 0.079207,
+      "user_cpu_seconds" : 0.866772
+    },
+    {
+      "cpu_percent_since_previous" : 0.18629502534065828,
+      "elapsed_seconds" : 2.177725458,
+      "peak_resident_bytes" : 186597376,
+      "resident_bytes" : 177618944,
+      "system_cpu_seconds" : 0.079624,
+      "user_cpu_seconds" : 0.867363
+    },
+    {
+      "cpu_percent_since_previous" : 0.10213331678660197,
+      "elapsed_seconds" : 2.703508833,
+      "peak_resident_bytes" : 186597376,
+      "resident_bytes" : 177356800,
+      "system_cpu_seconds" : 0.079939,
+      "user_cpu_seconds" : 0.867585
+    },
+    {
+      "cpu_percent_since_previous" : 0.03264952582565289,
+      "elapsed_seconds" : 3.224190208,
+      "peak_resident_bytes" : 186597376,
+      "resident_bytes" : 177356800,
+      "system_cpu_seconds" : 0.080052,
+      "user_cpu_seconds" : 0.867642
+    },
+    {
+      "cpu_percent_since_previous" : 0.032255008877394985,
+      "elapsed_seconds" : 3.738838958,
+      "peak_resident_bytes" : 186597376,
+      "resident_bytes" : 177356800,
+      "system_cpu_seconds" : 0.080131,
+      "user_cpu_seconds" : 0.867729
+    },
+    {
+      "cpu_percent_since_previous" : 0.06182369862191657,
+      "elapsed_seconds" : 4.261292333,
+      "peak_resident_bytes" : 186597376,
+      "resident_bytes" : 177356800,
+      "system_cpu_seconds" : 0.080276,
+      "user_cpu_seconds" : 0.867907
+    },
+    {
+      "cpu_percent_since_previous" : 0.05580772009689176,
+      "elapsed_seconds" : 4.7701825,
+      "peak_resident_bytes" : 186597376,
+      "resident_bytes" : 176881664,
+      "system_cpu_seconds" : 0.080472,
+      "user_cpu_seconds" : 0.867995
+    },
+    {
+      "cpu_percent_since_previous" : 0.019406448077768982,
+      "elapsed_seconds" : 5.295781,
+      "peak_resident_bytes" : 186597376,
+      "resident_bytes" : 176881664,
+      "system_cpu_seconds" : 0.080518,
+      "user_cpu_seconds" : 0.868051
+    },
+    {
+      "cpu_percent_since_previous" : 0.01894092637679137,
+      "elapsed_seconds" : 5.839577,
+      "peak_resident_bytes" : 186597376,
+      "resident_bytes" : 176881664,
+      "system_cpu_seconds" : 0.080575,
+      "user_cpu_seconds" : 0.868097
+    },
+    {
+      "cpu_percent_since_previous" : 0.03176783598788512,
+      "elapsed_seconds" : 6.377857291,
+      "peak_resident_bytes" : 186597376,
+      "resident_bytes" : 176881664,
+      "system_cpu_seconds" : 0.080676,
+      "user_cpu_seconds" : 0.868167
+    },
+    {
+      "cpu_percent_since_previous" : 0.03204369278566833,
+      "elapsed_seconds" : 6.883417,
+      "peak_resident_bytes" : 186597376,
+      "resident_bytes" : 176881664,
+      "system_cpu_seconds" : 0.08076,
+      "user_cpu_seconds" : 0.868245
+    },
+    {
+      "cpu_percent_since_previous" : 0.041847213623719855,
+      "elapsed_seconds" : 7.416307916,
+      "peak_resident_bytes" : 186597376,
+      "resident_bytes" : 176881664,
+      "system_cpu_seconds" : 0.08088,
+      "user_cpu_seconds" : 0.868348
+    },
+    {
+      "cpu_percent_since_previous" : 5.314653730068058,
+      "elapsed_seconds" : 7.954066375,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197754880,
+      "system_cpu_seconds" : 0.093655,
+      "user_cpu_seconds" : 0.884153
+    },
+    {
+      "cpu_percent_since_previous" : 1.0742054367743905,
+      "elapsed_seconds" : 8.502378625,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197754880,
+      "system_cpu_seconds" : 0.096549,
+      "user_cpu_seconds" : 0.887149
+    },
+    {
+      "cpu_percent_since_previous" : 1.0625527597716973,
+      "elapsed_seconds" : 9.051151375,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197754880,
+      "system_cpu_seconds" : 0.099379,
+      "user_cpu_seconds" : 0.89015
+    },
+    {
+      "cpu_percent_since_previous" : 1.1027779205716541,
+      "elapsed_seconds" : 9.599221833,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197754880,
+      "system_cpu_seconds" : 0.102459,
+      "user_cpu_seconds" : 0.893114
+    },
+    {
+      "cpu_percent_since_previous" : 0.1576040310261285,
+      "elapsed_seconds" : 10.149334666,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197754880,
+      "system_cpu_seconds" : 0.102896,
+      "user_cpu_seconds" : 0.893544
+    },
+    {
+      "cpu_percent_since_previous" : 0.03187679903491833,
+      "elapsed_seconds" : 10.673226666,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197754880,
+      "system_cpu_seconds" : 0.102987,
+      "user_cpu_seconds" : 0.89362
+    },
+    {
+      "cpu_percent_since_previous" : 0.03853256111768094,
+      "elapsed_seconds" : 11.197458625,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197754880,
+      "system_cpu_seconds" : 0.103102,
+      "user_cpu_seconds" : 0.893707
+    },
+    {
+      "cpu_percent_since_previous" : 0.025495435807074345,
+      "elapsed_seconds" : 11.703431541,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197754880,
+      "system_cpu_seconds" : 0.103172,
+      "user_cpu_seconds" : 0.893766
+    },
+    {
+      "cpu_percent_since_previous" : 0.02593320561687794,
+      "elapsed_seconds" : 12.243279958,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197754880,
+      "system_cpu_seconds" : 0.103245,
+      "user_cpu_seconds" : 0.893833
+    },
+    {
+      "cpu_percent_since_previous" : 0.0459868247746982,
+      "elapsed_seconds" : 12.743423208,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197754880,
+      "system_cpu_seconds" : 0.103325,
+      "user_cpu_seconds" : 0.893983
+    },
+    {
+      "cpu_percent_since_previous" : 0.04331184083921591,
+      "elapsed_seconds" : 13.281382333,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197705728,
+      "system_cpu_seconds" : 0.103452,
+      "user_cpu_seconds" : 0.894089
+    },
+    {
+      "cpu_percent_since_previous" : 0.029761549262223616,
+      "elapsed_seconds" : 13.829068875,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197705728,
+      "system_cpu_seconds" : 0.103551,
+      "user_cpu_seconds" : 0.894153
+    },
+    {
+      "cpu_percent_since_previous" : 0.02918626193529886,
+      "elapsed_seconds" : 14.377272,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197705728,
+      "system_cpu_seconds" : 0.103644,
+      "user_cpu_seconds" : 0.89422
+    },
+    {
+      "cpu_percent_since_previous" : 0.03379574274318112,
+      "elapsed_seconds" : 14.912842416,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197705728,
+      "system_cpu_seconds" : 0.103756,
+      "user_cpu_seconds" : 0.894289
+    },
+    {
+      "cpu_percent_since_previous" : 0.035449617377648,
+      "elapsed_seconds" : 15.462918875,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197705728,
+      "system_cpu_seconds" : 0.103861,
+      "user_cpu_seconds" : 0.894379
+    },
+    {
+      "cpu_percent_since_previous" : 0.030091942685677473,
+      "elapsed_seconds" : 15.971360625,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197181440,
+      "system_cpu_seconds" : 0.103941,
+      "user_cpu_seconds" : 0.894452
+    },
+    {
+      "cpu_percent_since_previous" : 0.026820261507502052,
+      "elapsed_seconds" : 16.511996666,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197181440,
+      "system_cpu_seconds" : 0.104024,
+      "user_cpu_seconds" : 0.894514
+    },
+    {
+      "cpu_percent_since_previous" : 0.0335733343791586,
+      "elapsed_seconds" : 17.012393791,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197181440,
+      "system_cpu_seconds" : 0.104117,
+      "user_cpu_seconds" : 0.894589
+    },
+    {
+      "cpu_percent_since_previous" : 0.043310542075350664,
+      "elapsed_seconds" : 17.513426541,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197181440,
+      "system_cpu_seconds" : 0.104226,
+      "user_cpu_seconds" : 0.894697
+    },
+    {
+      "cpu_percent_since_previous" : 0.04822828804065065,
+      "elapsed_seconds" : 18.048382291,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197181440,
+      "system_cpu_seconds" : 0.104355,
+      "user_cpu_seconds" : 0.894826
+    },
+    {
+      "cpu_percent_since_previous" : 0.038839489404254565,
+      "elapsed_seconds" : 18.596793208,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197181440,
+      "system_cpu_seconds" : 0.104473,
+      "user_cpu_seconds" : 0.894921
+    },
+    {
+      "cpu_percent_since_previous" : 0.027580201511948777,
+      "elapsed_seconds" : 19.111655291,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197181440,
+      "system_cpu_seconds" : 0.104555,
+      "user_cpu_seconds" : 0.894981
+    },
+    {
+      "cpu_percent_since_previous" : 0.02172887728735086,
+      "elapsed_seconds" : 19.65010925,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197181440,
+      "system_cpu_seconds" : 0.104627,
+      "user_cpu_seconds" : 0.895026
+    },
+    {
+      "cpu_percent_since_previous" : 0.020329450589194716,
+      "elapsed_seconds" : 20.156763375,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197181440,
+      "system_cpu_seconds" : 0.104683,
+      "user_cpu_seconds" : 0.895073
+    },
+    {
+      "cpu_percent_since_previous" : 0.028617792722618784,
+      "elapsed_seconds" : 20.663441166,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197181440,
+      "system_cpu_seconds" : 0.104776,
+      "user_cpu_seconds" : 0.895125
+    },
+    {
+      "cpu_percent_since_previous" : 0.023301377284785135,
+      "elapsed_seconds" : 21.169849,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197181440,
+      "system_cpu_seconds" : 0.104837,
+      "user_cpu_seconds" : 0.895182
+    },
+    {
+      "cpu_percent_since_previous" : 0.051747139239246544,
+      "elapsed_seconds" : 21.6896845,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197181440,
+      "system_cpu_seconds" : 0.104955,
+      "user_cpu_seconds" : 0.895333
+    },
+    {
+      "cpu_percent_since_previous" : 0.044727653906475845,
+      "elapsed_seconds" : 22.1972005,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197181440,
+      "system_cpu_seconds" : 0.105069,
+      "user_cpu_seconds" : 0.895446
+    },
+    {
+      "cpu_percent_since_previous" : 0.2505488593371466,
+      "elapsed_seconds" : 22.702491166,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197230592,
+      "system_cpu_seconds" : 0.105365,
+      "user_cpu_seconds" : 0.896416
+    },
+    {
+      "cpu_percent_since_previous" : 0.03167238089205506,
+      "elapsed_seconds" : 23.223449791,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197230592,
+      "system_cpu_seconds" : 0.105459,
+      "user_cpu_seconds" : 0.896487
+    },
+    {
+      "cpu_percent_since_previous" : 0.022905328854595494,
+      "elapsed_seconds" : 23.773540125,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197230592,
+      "system_cpu_seconds" : 0.105524,
+      "user_cpu_seconds" : 0.896548
+    },
+    {
+      "cpu_percent_since_previous" : 0.028945916364411045,
+      "elapsed_seconds" : 24.2848385,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197230592,
+      "system_cpu_seconds" : 0.105606,
+      "user_cpu_seconds" : 0.896614
+    },
+    {
+      "cpu_percent_since_previous" : 0.032174011308709255,
+      "elapsed_seconds" : 24.810107166,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197230592,
+      "system_cpu_seconds" : 0.105701,
+      "user_cpu_seconds" : 0.896688
+    },
+    {
+      "cpu_percent_since_previous" : 0.027845766919422567,
+      "elapsed_seconds" : 25.312876583,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197230592,
+      "system_cpu_seconds" : 0.105778,
+      "user_cpu_seconds" : 0.896751
+    },
+    {
+      "cpu_percent_since_previous" : 0.029738432868634566,
+      "elapsed_seconds" : 25.837450291,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197230592,
+      "system_cpu_seconds" : 0.105868,
+      "user_cpu_seconds" : 0.896817
+    },
+    {
+      "cpu_percent_since_previous" : 0.01943304699838393,
+      "elapsed_seconds" : 26.377767,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197230592,
+      "system_cpu_seconds" : 0.105924,
+      "user_cpu_seconds" : 0.896866
+    },
+    {
+      "cpu_percent_since_previous" : 0.02523177345840985,
+      "elapsed_seconds" : 26.881100625,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197230592,
+      "system_cpu_seconds" : 0.105984,
+      "user_cpu_seconds" : 0.896933
+    },
+    {
+      "cpu_percent_since_previous" : 0.02789807318441562,
+      "elapsed_seconds" : 27.418772166,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197230592,
+      "system_cpu_seconds" : 0.106063,
+      "user_cpu_seconds" : 0.897004
+    },
+    {
+      "cpu_percent_since_previous" : 0.022156849535548945,
+      "elapsed_seconds" : 27.919745916,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197230592,
+      "system_cpu_seconds" : 0.106124,
+      "user_cpu_seconds" : 0.897054
+    },
+    {
+      "cpu_percent_since_previous" : 0.016370568334463168,
+      "elapsed_seconds" : 28.4634045,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197230592,
+      "system_cpu_seconds" : 0.106171,
+      "user_cpu_seconds" : 0.897096
+    },
+    {
+      "cpu_percent_since_previous" : 0.01637816184066681,
+      "elapsed_seconds" : 29.000705333,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197230592,
+      "system_cpu_seconds" : 0.106217,
+      "user_cpu_seconds" : 0.897138
+    },
+    {
+      "cpu_percent_since_previous" : 0.0269583560794455,
+      "elapsed_seconds" : 29.501477708,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197230592,
+      "system_cpu_seconds" : 0.106278,
+      "user_cpu_seconds" : 0.897212
+    },
+    {
+      "cpu_percent_since_previous" : 0.02732954468117328,
+      "elapsed_seconds" : 30.010084791,
+      "peak_resident_bytes" : 220250112,
+      "resident_bytes" : 197230592,
+      "system_cpu_seconds" : 0.106343,
+      "user_cpu_seconds" : 0.897286
+    }
+  ],
+  "scope" : "Main GUI process only; excludes Astrolog child processes. CPU is the getrusage(RUSAGE_SELF) delta during this sample. Resident memory is task_info(MACH_TASK_BASIC_INFO), not total physical footprint. Peak RSS is ru_maxrss in bytes since process launch. A brief sample does not prove absence of long-term leaks.",
+  "system_cpu_seconds" : 0.027397999999999992,
+  "timestamp_utc" : "2026-11-04T14:56:41Z",
+  "user_cpu_seconds" : 0.030747999999999998
+}

@@ -1,0 +1,12 @@
+{
+  "passed": 6,
+  "failed": 0,
+  "platform": "Linux",
+  "checks": [
+    "Default bundle discovery: calculate, synastry, graphics in Contents/Helpers",
+    "Legacy bundle discovery: calculate, synastry, graphics in Resources/Engine"
+  ],
+  "scenario": "Relocated app path containing spaces; working directory /tmp; default AstrologEngine() without explicit URLs",
+  "limitations": "Linux Foundation bundle lookup validated; macOS signing and GUI not tested",
+  "timestamp": "2026-11-04T17:56:01.880578+00:00"
+}

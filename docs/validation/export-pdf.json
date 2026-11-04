@@ -1,0 +1,32 @@
+{
+  "timestamp_utc": "2026-11-04T14:54:34.551517+00:00",
+  "export": "Native chart PDF exported through application UI",
+  "page_count": 1,
+  "media_box_points": [
+    0,
+    0,
+    900,
+    1120
+  ],
+  "file_size_bytes": 141103,
+  "extracted_text_characters": 502,
+  "renderer": "macOS PDFKit, rasterized at 1.5 pixels per PDF point",
+  "render_pixels": [
+    1350,
+    1680
+  ],
+  "visual_review": {
+    "chart_present": true,
+    "twelve_zodiac_signs_present": true,
+    "twelve_houses_present": true,
+    "ten_planet_positions_present": true,
+    "aspect_lines_present": true,
+    "chart_date_location_present": true,
+    "footer_present": true,
+    "clipping_or_overlap_observed": false
+  },
+  "notes": [
+    "Visual review passed. Zodiac signs render using the system color emoji font; chart remains legible.",
+    "Some Cyrillic glyphs map differently in extracted text, although visual rendering is correct; full text extraction fidelity is not asserted."
+  ]
+}

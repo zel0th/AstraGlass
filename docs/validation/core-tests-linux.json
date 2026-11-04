@@ -1,0 +1,26 @@
+{
+  "checks" : [
+    "J2000 Julian day",
+    "Finite positions, unique IDs, twelve house cusps, valid ranges",
+    "Object choices, both nodes, honest Charon availability, and each of 24 aspect switches",
+    "Synastry runs through the same explicitly supplied executable",
+    "All ten principal planets match original Astrolog CLI within its one-arcminute display precision",
+    "UTC offsets +03:00, +05:30, and +14:00 across midnight give identical chart",
+    "Seven house systems at southern latitude",
+    "Aspect separation and orb checked independently for every returned aspect",
+    "Sidereal mode changes longitude",
+    "Leap date and rejection of invalid date, month, latitude, and nonfinite offset",
+    "Report editor rejects file\/script and graphics switches including alternate prefixes and relationship variants",
+    "Output limit also applies to a child that exits between polling intervals",
+    "Aspect, grid, midpoint, and help reports execute",
+    "All eleven Astrolog graphics presets produce nonempty bitmaps with valid headers; AppKit decoding not tested on Linux",
+    "Concurrent requests remain isolated",
+    "Source provenance and complete principal planet\/sign and house\/sign corpus bindings",
+    "Cyrillic case-insensitive search and aspect endpoint lookup symmetry"
+  ],
+  "engine" : "Astrolog 8.00",
+  "failed" : 0,
+  "passed" : 17,
+  "platform" : "Ubuntu 24.04.3 LTS",
+  "timestamp" : "2026-11-04T17:59:08Z"
+}

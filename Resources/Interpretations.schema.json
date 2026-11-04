@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AstraGlass interpretation corpus",
+  "type": "object",
+  "required": ["schemaVersion", "sources", "records"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "author": { "type": "string" },
+    "language": { "type": "string" },
+    "sourcePolicy": { "type": "string" },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "fileName", "title", "sha256", "sectionCount"],
+        "properties": {
+          "id": { "type": "string" },
+          "fileName": { "type": "string" },
+          "title": { "type": "string" },
+          "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "sectionCount": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "originalTitle", "category", "body", "source", "sourceTitle", "sourceSHA256", "paragraphStart", "paragraphEnd", "headingLevel", "breadcrumbs", "keywords", "planetIDs", "signIndices", "houseNumbers", "bindings"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "originalTitle": { "type": "string" },
+          "category": { "type": "string" },
+          "body": { "type": "string" },
+          "source": { "type": "string" },
+          "sourceTitle": { "type": "string" },
+          "sourceSHA256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+          "paragraphStart": { "type": "integer", "minimum": 1 },
+          "paragraphEnd": { "type": "integer", "minimum": 1 },
+          "headingLevel": { "type": "integer", "minimum": 1, "maximum": 9 },
+          "breadcrumbs": { "type": "array", "items": { "type": "string" } },
+          "keywords": { "type": "array", "items": { "type": "string" } },
+          "planetIDs": { "type": "array", "items": { "type": "integer" } },
+          "signIndices": { "type": "array", "items": { "type": "integer", "minimum": 0, "maximum": 11 } },
+          "houseNumbers": { "type": "array", "items": { "type": "integer", "minimum": 1, "maximum": 12 } },
+          "aspectAngle": { "type": ["number", "null"] },
+          "bindings": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}
