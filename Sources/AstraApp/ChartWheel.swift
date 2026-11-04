@@ -222,7 +222,8 @@ struct ChartWheel: View {
 
     private func drawLeaders(context: inout GraphicsContext, planets: [PlanetPosition], markers: [Int: CGPoint], radius: CGFloat, center: CGPoint, secondary: Bool) {
         for planet in planets {
-            let anchor = point(planet.longitude, radius: radius * (secondary ? 0.49 : ChartWheelGeometry.houseInner), center: center)
+            // Use the exact aspect vertex, including when a crowded glyph is displaced.
+            let anchor = point(planet.longitude, radius: radius * aspectRadius, center: center)
             if let marker = markers[planet.id] {
                 var leader = Path(); leader.move(to: anchor); leader.addLine(to: marker)
                 context.stroke(leader, with: .color(AstroStyle.objectColor(planet.id).opacity(0.45)), style: StrokeStyle(lineWidth: 0.6, dash: secondary ? [2, 2] : []))
@@ -237,13 +238,17 @@ struct ChartWheel: View {
         ForEach(planets) { planet in
             let selected = secondary ? selectedSecondaryPlanet == planet.id : selectedPlanet == planet.id
             Button { if secondary { selectSecondary(planet.id) } else { select(planet.id) } } label: {
-                VStack(spacing: 0) {
-                    Text(AstroStyle.glyph(planet.id)).font(AstroStyle.symbolFont(size: (isComparison ? 18 : 25) * labelScale))
-                    Text("\(Int(planet.degreeInSign))°" + (planet.isRetrograde ? " ℞" : ""))
-                        .font(.system(size: (isComparison ? 7 : 8) * labelScale, weight: .medium))
-                }
+                Text(AstroStyle.glyph(planet.id))
+                    .font(AstroStyle.symbolFont(size: (isComparison ? 16 : 22) * labelScale))
+                    .overlay(alignment: .bottomTrailing) {
+                        if planet.isRetrograde {
+                            Text("℞")
+                                .font(.system(size: (isComparison ? 7 : 8) * labelScale, weight: .medium))
+                                .offset(x: 5 * labelScale, y: 2 * labelScale)
+                        }
+                    }
                 .foregroundStyle(AstroStyle.objectColor(planet.id))
-                .frame(width: (isComparison ? 22 : 32) * labelScale, height: (isComparison ? 26 : 38) * labelScale)
+                .frame(width: (isComparison ? 22 : 32) * labelScale, height: (isComparison ? 24 : 32) * labelScale)
                 .background(.background.opacity(0.85), in: RoundedRectangle(cornerRadius: 7))
                 .background(selected ? AstroStyle.objectColor(planet.id).opacity(0.18) : .clear, in: RoundedRectangle(cornerRadius: 7))
                 .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(AstroStyle.objectColor(planet.id).opacity(selected ? 0.9 : secondary ? 0.35 : 0), style: StrokeStyle(lineWidth: selected ? 1.5 : 0.7, dash: secondary ? [2, 2] : [])))

@@ -1,0 +1,43 @@
+{
+  "version": "0.3.6",
+  "platform": "macOS 27.2 arm64",
+  "artifacts": [
+    {
+      "file": "AstraGlass-0.3.6-macOS-arm64.dmg",
+      "bytes": 4507100,
+      "sha256": "ff0833c065e774363c62457227593289d50f368f4af7ca3c87003ee14952d7cd",
+      "personal": false
+    },
+    {
+      "file": "AstraGlass-0.3.6-macOS-arm64.zip",
+      "bytes": 4167394,
+      "sha256": "b255d15dc4c2c79c95b1be2bb9a38695970ec6a7a3f5fec5fb88df9944e97623",
+      "personal": false
+    },
+    {
+      "file": "AstraGlass-0.3.6-macOS-arm64-personal.dmg",
+      "bytes": 6214362,
+      "sha256": "724ea89144bc2bfbc79eef689227e16ee7ccf28f9ba31af0e13fb8fb9189959b",
+      "personal": true
+    },
+    {
+      "file": "AstraGlass-0.3.6-macOS-arm64-personal.zip",
+      "bytes": 5341025,
+      "sha256": "6ab62903fa3dc73f10bcedc43c4100daa5f8875131bc758531c94122108d111c",
+      "personal": true
+    }
+  ],
+  "checks": [
+    "Swift 6 optimized build",
+    "Resource suite: glyphs, object/aspect colors, conjunction targets, clustered labels, house hit regions and Podvodny corpus",
+    "GUI natal and native synastry: leaders meet aspect vertices, degree labels removed, smaller glyphs, retrograde marks retained",
+    "GUI cross-chart opposition selection opens corresponding inspector",
+    "ad-hoc signatures",
+    "DMG checksum and readonly mount",
+    "Applications link",
+    "embedded Astrolog and licenses",
+    "relocated natal, comparison grids, reports and bitmap",
+    "public no corpus; personal Podvodny only; no Txt3",
+    "ZIP integrity and executable permissions"
+  ]
+}

@@ -1,6 +1,6 @@
 # AstraGlass — continuation checkpoint
 
-Updated: 5 November 2026 (Moscow). Version **0.3.5**.
+Updated: 5 November 2026 (Moscow). Version **0.3.6**.
 
 ## Repository and authorization
 - Continue this repository, not the old AstrologMac project.
@@ -17,6 +17,12 @@ Updated: 5 November 2026 (Moscow). Version **0.3.5**.
 - Local Podvodny corpus: 823 sections / 4 documents. Russian-only lookup/search/PDF; absent custom corpus hidden.
 - Txt3 remains retired: hidden from settings, excluded by build whitelist and package validators; original kept only in PrivateCorpus.
 - Responsive ChartDashboardLayout, proportional glyph scaling, bottom summary strip; inspector default 800, resizable 360–1200.
+
+## 0.3.6 changes
+- Planet/point leaders and colored dots now share the exact aspect vertex radius and longitude in natal and comparison wheels.
+- Removed degrees beside glyphs; retained retrograde marks and precise positions in tables, tooltips and inspector.
+- Glyph sizes reduced 25→22 pt (natal), 18→16 pt (comparison); proportional scaling and conservative collision spacing retained.
+- Shared ChartWheel also updates native exports. No engine, corpus or chart-database changes.
 
 ## 0.3.5 delivered changes
 - Native wheel: zodiac .84–1R, 360° scale .78–.84R, house annulus .68–.78R; numbers centered; planets inside .68R.
@@ -37,14 +43,12 @@ Updated: 5 November 2026 (Moscow). Version **0.3.5**.
 - Previous 0.3.3: selectable conjunction badges, shared aspect colors, house tints, calendar pickers and saved-chart editor chooser remain.
 
 ## Validation this milestone
-- Core: 19 groups, including directed comparison grids, exact Astrolog orbs, same-object conjunctions and selection filters.
-- Atlas: 27 checks. Workspace: 16 groups, including comparison cancellation and invalidation.
-- Resources: all glyphs, lilac opposition, 22 clustered labels per row, sector centers, 12 exclusive house hit regions and 0° wrap.
-- GUI final build: house 6, native synastry/transits, localized tables, secondary Sun and cross-chart opposition selection.
-- PDF: 18 A4 pages / 45 paragraphs; localization: 302 keys; default bundle discovery tested in both helper locations.
-- Both DMGs: signatures, readonly mount, relocated comparison/natal/report/graphic tests; public no corpus, personal Podvodny only.
-- Evidence: docs/validation/distribution-0.3.5.json and gui-comparison-idle-0.3.5.json.
-- Release: https://github.com/zel0th/AstraGlass/releases/tag/v0.3.5
+- Swift 6 optimized arm64 build and relocated natal/comparison/report/graphic checks passed.
+- Resource suite passed: all glyphs/colors, 22 clustered labels per row, house hit regions, calendar and Podvodny corpus.
+- GUI: natal and native synastry inspected; leaders meet aspect vertices, no degree labels, retrograde marks visible; cross-chart opposition selection works.
+- Both DMGs verified: signatures, readonly mounts, relocated calculations, ZIP integrity; public no corpus, personal Podvodny only.
+- Evidence: docs/validation/distribution-0.3.6.json. Release: https://github.com/zel0th/AstraGlass/releases/tag/v0.3.6
+- Prior core/workspace/PDF/localization/performance evidence retained under docs/validation (0.3.5).
 
 ## Reproduce
 ```sh
@@ -61,6 +65,7 @@ bash scripts/package.sh --with-corpus
 - Public source/release excludes PrivateCorpus, interpretations*.json, books, personal charts and personal packages.
 - Personal DMG includes Podvodny; deliver privately. Both packages embed Astrolog, no Homebrew required.
 - hdiutil requires native runtime here; restricted shell cannot configure disk-image device.
+- Run packaging modes sequentially: both rebuild the same Engine/bin/astrolog output.
 - Ad-hoc signing only, no Developer ID/notarization. No full Astrolog parity; see FEATURES.md.
 - Some minor bodies need extra ephemerides; no fabricated positions. Progressions, animation and .as import remain future work.
 - Previous performance: 100 calculations, mean 36.53 ms; GUI 182.28 MiB/2.618% CPU exploratory, not controlled idle. See PERFORMANCE.md.
