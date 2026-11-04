@@ -27,8 +27,10 @@ Updated: 4 November 2026 (Moscow). Version: **0.2.0**.
 - DMG validation mounts read-only, verifies signature and Applications link, then tests relocated calculations/graphics.
 - Public startup treats absent private books as the expected empty library; corrupt imports still report errors.
 - Source and releases must exclude PrivateCorpus, interpretations.json, personal charts and personal packages.
-- Native tests and ZIP succeeded; final disk-image creation and GitHub publication are being completed in this milestone.
-- In the restricted shell, hdiutil creation failed with device-not-configured; use the available native runtime for disk-image operations. This is an execution-environment issue, not a compiler failure.
+- Full source published to main. Clean Git archive rebuilt successfully; DMG and ZIP passed all packaging checks.
+- Release: https://github.com/zel0th/AstraGlass/releases/tag/v0.2.0 (DMG, ZIP, full source archive and SHA-256).
+- Distribution evidence: docs/validation/distribution.json; binary dependencies are system-only.
+- hdiutil requires the native runtime in this environment; the restricted shell cannot configure a disk-image device. Final native-runtime packaging exited 0.
 
 ## Reproduce
 ```sh

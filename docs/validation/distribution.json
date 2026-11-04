@@ -1,0 +1,36 @@
+{
+  "version": "0.2.0",
+  "clean_build_input_commit": "8f0d3ee50a86fbb9b0f3c38f7863fb9625881484",
+  "build_from_git_archive": true,
+  "dmg_readonly_mount_validated": true,
+  "relocated_natal_synastry_graphics_pass": true,
+  "codesign_deep_strict": true,
+  "binaries": [
+    {
+      "path": "Contents/MacOS/AstraGlass",
+      "format": "Mach-O 64-bit executable arm64",
+      "minimum_macos": "27.0",
+      "sha256": "53b6b7110dcb2e75425d5a54d6b4b07ceb9c8953b28e4ebc6c754b85d74c0bf5",
+      "non_system_dylibs": false
+    },
+    {
+      "path": "Contents/Helpers/astrolog",
+      "format": "Mach-O 64-bit executable arm64",
+      "minimum_macos": "27.0",
+      "sha256": "c9c97be7307ac8cea2ba6c199dfe1bec5f2458d3efe77947d4df9cc37c6912b7",
+      "non_system_dylibs": false
+    }
+  ],
+  "assets": [
+    {
+      "name": "AstraGlass-0.2.0-macOS-arm64.dmg",
+      "bytes": 4253443,
+      "sha256": "ef79b13452d3c1be4226000ecbdd7621e30548e62d30aec859ac7d125f0471bf"
+    },
+    {
+      "name": "AstraGlass-0.2.0-macOS-arm64.zip",
+      "bytes": 3945401,
+      "sha256": "2abb980fb164060e3424479da0558602f2b4f0c1bb83764529f5b49a602ea120"
+    }
+  ]
+}
