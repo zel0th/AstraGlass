@@ -1,0 +1,22 @@
+{
+  "version": "0.3.0",
+  "code_commit": "41b7c5c3891717231c398a0446aa2ed1093b8697",
+  "public_assets": [
+    {
+      "name": "AstraGlass-0.3.0-macOS-arm64.dmg",
+      "bytes": 4363502,
+      "sha256": "43d3bd4bb63cc67f975f98272331a6c176eec22bcc41d42b4aba2279f5893385"
+    },
+    {
+      "name": "AstraGlass-0.3.0-macOS-arm64.zip",
+      "bytes": 4042342,
+      "sha256": "fe1a506041e4dded4a7ee6bbd0ba48039657bf0e43280505675a9a2170b0e99f"
+    }
+  ],
+  "personal_bundle_sources": 304,
+  "personal_bundle_sections": 28172,
+  "personal_dmg_mounted_and_relocated_engine_checks": "passed",
+  "public_dmg_mounted_and_relocated_engine_checks": "passed",
+  "signatures": "ad-hoc, verified deep strict",
+  "public_private_corpus_exclusion": "passed"
+}

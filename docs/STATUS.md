@@ -1,6 +1,6 @@
 # AstraGlass — continuation checkpoint
 
-Updated: 4 November 2026 (Moscow). Version: **0.3.0** (packaging in progress).
+Updated: 4 November 2026 (Moscow). Version: **0.3.0**.
 
 ## Repository and authorization
 - Continue `Share/Projects/AstraGlass`, not the older AstrologMac project.
@@ -60,5 +60,6 @@ bash scripts/package.sh --public
 - Added atomic JSON database with backup, autosave on Apply, update, search, reopen, second-chart opening and deletion. GUI saved/reopened a clearly named Helsinki demonstration chart.
 - Current checks: core 17, atlas 27, workspace 11, database 7, Txt3 importer 17; resource/font suite passed. PDF 18 pages with all 45 synthetic paragraphs passed. 302 locale keys match.
 - Personal runtime with Txt3 was observed at 419.91 MiB RSS and ps 0.0% CPU after interaction; this is one sample, not a controlled memory/CPU benchmark. Corpus load in native resource harness: 3.013 s.
-- Personal/public packages and source publication are the remaining steps. Native runtime is required for hdiutil.
+- Personal and public DMG/ZIP completed; signatures, readonly DMG mounts and relocated natal/synastry/graphics passed. Public packages contain no private corpora. Native runtime is required for hdiutil.
+- Personal DMG saved for delivery; release URL: https://github.com/zel0th/AstraGlass/releases/tag/v0.3.0. Code commit: 41b7c5c. Distribution evidence: docs/validation/distribution-0.3.0.json.
 - Additional tests: bash scripts/test-database.sh; bash scripts/test-resources.sh.
