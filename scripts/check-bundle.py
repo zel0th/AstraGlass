@@ -33,8 +33,14 @@ with tempfile.TemporaryDirectory(prefix='AstraGlass relocated ') as folder:
     report = subprocess.run([str(engine), *args, *second, '-r0', 'nul', 'nul', '-a'],
                             cwd=folder, env=env, capture_output=True, timeout=30, check=True)
     assert len(report.stdout) > 100, 'Empty synastry report'
+    for mode in ['-r0', '-rt']:
+        comparison = subprocess.run([str(engine), '--comparison-json', *args, *second, mode, 'nul', 'nul'],
+                                    cwd=folder, env=env, capture_output=True, text=True, timeout=20, check=True)
+        grid = json.loads(comparison.stdout[comparison.stdout.index('{'):comparison.stdout.rindex('}') + 1])
+        assert grid['aspects'], 'Empty native comparison grid'
+        assert any(a['first'] == 1 and a['second'] == 3 and a['kind'] == 2 for a in grid['aspects']), 'Missing Sun-Mercury cross-chart opposition'
     bitmap = Path(folder) / 'relocated.bmp'
     subprocess.run([str(engine), *args, '-v', '-Xw', '600', '600', '-Xbb', '-Xo', str(bitmap)],
                    cwd=folder, env=env, capture_output=True, timeout=40, check=True)
     assert bitmap.read_bytes()[:2] == b'BM', 'Invalid graphics output'
-print('Bundle verified: resources, executable permissions, relocated natal/synastry/graphics')
+print('Bundle verified: resources, executable permissions, relocated natal/comparison grids/reports/graphics')

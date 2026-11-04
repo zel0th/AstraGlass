@@ -13,7 +13,8 @@ int main(int argc, char **argv) {
   // each relative -Yi directory; app paths with spaces can exceed that buffer.
   // Use the resource directory and ASTROLOG path, never the app's long path.
   argv[0] = (char *)"astrolog";
-  if (argc < 2 || strcmp(argv[1], "--json") != 0)
+  const bool comparison = argc > 1 && strcmp(argv[1], "--comparison-json") == 0;
+  if (argc < 2 || (strcmp(argv[1], "--json") != 0 && !comparison))
     return AstrologMain(argc, argv);
   InitProgram();
   is.szProgName = argv[0];
@@ -35,6 +36,23 @@ int main(int argc, char **argv) {
   memcpy(previousIgnore, ignore, sizeof(previousIgnore));
   ciMain = ciCore;
   if (us.nRel) CastRelation(); else CastChart(1);
+  if (comparison) {
+    if (!us.nRel || !FCreateGridRelation(fFalse)) return 3;
+    // Relationship grids put chart #1 on Y, chart #2 on X. Keep
+    // both directions and self-pairs: Sun(1)-Moon(2) != Moon(1)-Sun(2).
+    printf("{\"aspects\":[");
+    bool comma = false;
+    for (int y = 0; y <= is.nObj; ++y) if (!FIgnore(y))
+      for (int x = 0; x <= is.nObj; ++x) if (!FIgnore2(x) && grid->n[x][y]) {
+        if (comma) printf(","); comma = true;
+        int a = grid->n[x][y];
+        printf("{\"first\":%d,\"second\":%d,\"kind\":%d,\"angle\":%.8f,\"orb\":%.8f}",
+          y, x, a, rAspAngle[a], grid->v[x][y]);
+      }
+    printf("]}\n");
+    FinalizeProgram(fFalse);
+    return 0;
+  }
   if (!FCreateGrid(fFalse)) return 3;
   printf("{\"engine\":\"Astrolog 8.00\",\"julianDay\":%.10f,\"positions\":[", JulianDayFromTime(is.T));
   bool comma = false;

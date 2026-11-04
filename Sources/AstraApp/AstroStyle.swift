@@ -64,7 +64,8 @@ enum AstroStyle {
     static func aspectColor(_ angle: Double) -> Color {
         switch Int(angle.rounded()) {
         case 0: return .blue
-        case 90, 180, 45, 135: return .red
+        case 180: return Color(red: 0.72, green: 0.52, blue: 0.94)
+        case 90, 45, 135: return .red
         case 120: return .green
         case 60: return .teal
         default: return accent

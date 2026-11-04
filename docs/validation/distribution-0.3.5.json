@@ -1,0 +1,39 @@
+{
+  "version": "0.3.5",
+  "platform": "macOS 27.2 arm64",
+  "artifacts": [
+    {
+      "file": "AstraGlass-0.3.5-macOS-arm64.dmg",
+      "bytes": 4506933,
+      "sha256": "dd3234af244c66e28eb1575768f941fc2dd790335556ba7a8f655f6b8561ac7f",
+      "personal": false
+    },
+    {
+      "file": "AstraGlass-0.3.5-macOS-arm64.zip",
+      "bytes": 4167047,
+      "sha256": "833b9f1bccdde00b6787babd1ebf8b56b6e0e69804634a095453c5cb9cff9f35",
+      "personal": false
+    },
+    {
+      "file": "AstraGlass-0.3.5-macOS-arm64-personal.dmg",
+      "bytes": 6214110,
+      "sha256": "8b0c5d0f2bf96334a5b4bea350f925a453fb47242b3b9b4a8ee41e4af3f06168",
+      "personal": true
+    },
+    {
+      "file": "AstraGlass-0.3.5-macOS-arm64-personal.zip",
+      "bytes": 5340675,
+      "sha256": "fc2ae1084619c16867744edff69648110c8d1d788df644b27567acce6c43e9b6",
+      "personal": true
+    }
+  ],
+  "checks": [
+    "ad-hoc signatures",
+    "DMG checksum and readonly mount",
+    "Applications link",
+    "embedded Astrolog and licenses",
+    "relocated natal, native synastry/transit grids, reports and bitmap",
+    "public no corpus; personal Podvodny 823 sections / 4 sources; no Txt3",
+    "ZIP integrity and executable permissions"
+  ]
+}

@@ -72,6 +72,32 @@ private func distance(_ a: Double, _ b: Double) -> Double {
         try require(selectedReport.count > 50, "Synastry must use the configured engine and selected objects")
         checked("Synastry runs through the same explicitly supplied executable")
 
+        let comparisonDate = ChartInput(year: 1985, month: 1, day: 26, hour: 11, minute: 30, utcOffset: 3, longitude: 30.3, latitude: 59.9)
+        for transit in [false, true] {
+            let comparison = try await engine.comparison(j2000, secondary: comparisonDate, transit: transit)
+            let primary = try await engine.calculate(j2000, preferences: .defaults)
+            let second = try await engine.calculate(comparisonDate, preferences: .defaults)
+            try require(comparison.primary.positions == primary.positions && comparison.secondary.positions == second.positions, "Biwheel must retain both real charts")
+            try require(comparison.primary.houseCusps == primary.houseCusps && comparison.transit == transit && !comparison.aspects.isEmpty, "Comparison must retain primary houses and its mode")
+            for aspect in comparison.aspects {
+                let first = primary.positions.first { $0.id == aspect.first }!
+                let other = second.positions.first { $0.id == aspect.second }!
+                try require(abs(abs(distance(first.longitude, other.longitude) - aspect.angle) - abs(aspect.orb)) < 1e-6, "Cross-grid axes or orbital separation are incorrect")
+            }
+            let selfComparison = try await engine.comparison(j2000, secondary: j2000, transit: transit)
+            for id in 1...10 {
+                try require(selfComparison.aspects.contains { $0.first == id && $0.second == id && $0.kind == 1 && abs($0.orb) < 1e-7 }, "Same-object conjunctions must survive comparison serialization")
+            }
+            for aspect in primary.aspects {
+                try require(selfComparison.aspects.contains { $0.first == aspect.first && $0.second == aspect.second && $0.kind == aspect.kind && abs(abs($0.orb) - abs(aspect.orb)) < 1e-7 }, "Relationship grid must preserve Astrolog's object-specific orbs")
+            }
+            let restricted = try await engine.comparison(j2000, secondary: comparisonDate, transit: transit, preferences: ChartPreferences(enabledObjects: [1, 2], enabledAspects: [2]))
+            try require(restricted.primary.positions.count == 2 && restricted.secondary.positions.count == 2 && restricted.aspects.allSatisfy { $0.kind == 2 && [1, 2].contains($0.first) && [1, 2].contains($0.second) }, "Comparison must honor enabled bodies and aspects")
+            let empty = try await engine.comparison(j2000, secondary: comparisonDate, transit: transit, preferences: ChartPreferences(enabledObjects: [], enabledAspects: []))
+            try require(empty.primary.positions.isEmpty && empty.secondary.positions.isEmpty && empty.aspects.isEmpty, "Empty selections must stay empty in comparisons")
+        }
+        checked("Native synastry/transit grids: both real charts, directed cross-aspects, same-object conjunctions, exact engine orbs and preference filters")
+
         // Read the original Astrolog textual output, independently parse its DMS
         // positions, and compare the adapter's full precision JSON to that display.
         let report = try await engine.report(j2000, options: ["-v"])

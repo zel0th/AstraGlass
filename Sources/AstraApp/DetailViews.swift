@@ -56,9 +56,23 @@ struct InterpretationInspector: View {
                 if let sign = model.selectedSign {
                     Text(AstroStyle.signGlyphs[sign]).font(AstroStyle.symbolFont(size: 43)).foregroundStyle(AstroStyle.elementColors[sign % 4])
                     Text(AstroStyle.signNames[sign]).font(.system(size: 25, weight: .medium, design: .serif))
-                } else if let house = model.selectedHouse, let cusps = model.snapshot?.houseCusps, cusps.indices.contains(house - 1) {
+                } else if let house = model.selectedHouse, let cusps = model.inspectorCusps, cusps.indices.contains(house - 1) {
                     Text(L10n.text("Дом \(house)", "House \(house)")).font(.system(size: 25, weight: .medium, design: .serif))
                     Text("\(AstroStyle.signNames[AstroStyle.sign(cusps[house - 1])]) · \(AstroStyle.position(cusps[house - 1]))").font(.subheadline).foregroundStyle(.secondary)
+                } else if model.comparisonIsVisible {
+                    if let aspect = model.comparisonAspect {
+                        Text("① " + AstroStyle.name(aspect.first) + "\n" + AstroStyle.aspectName(aspect.angle).lowercased() + "\n② " + AstroStyle.name(aspect.second)).font(.system(size: 23, weight: .medium, design: .serif))
+                        Text(String(format: L10n.text("Орбис %.2f°"), abs(aspect.orb))).font(.caption).foregroundStyle(.secondary)
+                        Text("① " + model.title + " · ② " + model.secondaryTitle).font(.caption).foregroundStyle(.secondary)
+                    } else if let planet = model.comparisonPosition {
+                        Text((model.comparisonSecondarySelected ? "② " : "① ") + AstroStyle.name(planet.id)).font(.system(size: 23, weight: .medium, design: .serif))
+                        Text(AstroStyle.signNames[planet.sign] + " · " + AstroStyle.position(planet.longitude)).font(.subheadline)
+                        Text(L10n.text("Дом в собственной карте: \(planet.house)", "House in its own chart: \(planet.house)")).font(.caption).foregroundStyle(.secondary)
+                    } else {
+                        Text(L10n.text("Выберите элемент карты")).font(.headline)
+                    }
+                    Text(L10n.text("Ниже — общие трактовки положений и аспектов; они не являются отдельной интерпретацией синастрии или транзита.", "Below are general interpretations of positions and aspects, not a dedicated synastry or transit interpretation."))
+                        .font(.caption).foregroundStyle(.secondary)
                 } else if let aspect = model.selectedAspect {
                     Text("\(AstroStyle.name(aspect.first))\n\(AstroStyle.aspectName(aspect.angle).lowercased())\n\(AstroStyle.name(aspect.second))").font(.system(size: 23, weight: .medium, design: .serif))
                     Text(String(format:L10n.text("Орбис %.2f°"),abs(aspect.orb))).font(.caption).foregroundStyle(.secondary)
@@ -81,7 +95,8 @@ struct InterpretationInspector: View {
                     }.padding(23)
                 }
             }
-        }.background(Color(nsColor: .textBackgroundColor).opacity(0.35))
+        }.frame(maxHeight: .infinity, alignment: .top)
+            .background(Color(nsColor: .textBackgroundColor).opacity(0.35))
     }
 }
 
@@ -136,27 +151,6 @@ struct ReportOutput: View {
             if model.report.isEmpty { EmptyPanel(title:L10n.text("Отчёт ещё не построен"),description:L10n.text("Выберите вид расчёта и нажмите «Рассчитать»."),symbol:"doc.text.magnifyingglass").frame(maxWidth:.infinity,maxHeight:.infinity) }
             else { ScrollView([.horizontal,.vertical]) { Text(model.report).font(.system(size:12,design:.monospaced)).textSelection(.enabled).fixedSize(horizontal:true,vertical:true).padding(18).frame(maxWidth:.infinity,alignment:.topLeading) }.background(Color(nsColor:.textBackgroundColor),in:RoundedRectangle(cornerRadius:12)) }
         }.frame(maxWidth:.infinity,maxHeight:.infinity,alignment:.topLeading)
-    }
-}
-
-struct RelationshipView: View {
-    @ObservedObject var model: WorkspaceModel
-    let transit: Bool
-    var body: some View {
-        VStack(alignment:.leading,spacing:22) {
-            SectionHeading(eyebrow:transit ? L10n.text("Движение во времени") : L10n.text("Две карты"),title:transit ? L10n.text("Транзиты") : L10n.text("Синастрия"),subtitle:transit ? L10n.text("Сопоставьте положение планет на выбранную дату с натальной картой") : L10n.text("Сравните положения планет и межкартные аспекты"))
-            HStack(alignment:.top,spacing:24) {
-                VStack(alignment:.leading,spacing:8) { Text(L10n.text("ОСНОВНАЯ КАРТА")).font(.system(size:9,weight:.semibold)).tracking(1.2).foregroundStyle(.secondary); Text(model.title).font(.headline); Text(model.place).font(.caption).foregroundStyle(.secondary); Text(model.dateSummary).font(.caption).foregroundStyle(.secondary); Button(L10n.text("Изменить…")) { model.edit() } }.frame(maxWidth:.infinity,alignment:.leading)
-                Divider()
-                VStack(alignment:.leading,spacing:8) { Text(transit ? L10n.text("ТРАНЗИТНАЯ ДАТА") : L10n.text("ВТОРАЯ КАРТА")).font(.system(size:9,weight:.semibold)).tracking(1.2).foregroundStyle(.secondary); Text(model.secondaryTitle).font(.headline); Text(model.secondaryPlace).font(.caption).foregroundStyle(.secondary); Text(model.secondaryDateSummary).font(.caption).foregroundStyle(.secondary); HStack { Button(L10n.text("Изменить…")) { model.edit(secondary:true) }; Button(L10n.text("Открыть…")) { model.open(secondary:true) } } }.frame(maxWidth:.infinity,alignment:.leading)
-            }.fixedSize(horizontal:false,vertical:true).padding(20).background(.quaternary.opacity(0.3),in:RoundedRectangle(cornerRadius:16))
-            HStack { if model.reportIsRunning { ProgressView().controlSize(.small); Button(L10n.text("Отменить")) { model.cancelReport() } } else { Button(transit ? L10n.text("Рассчитать транзиты") : L10n.text("Сравнить карты")) { model.runComparison(transit:transit) }.buttonStyle(.borderedProminent) }; Spacer(); if transit { Button(L10n.text("Транзиты на месяц")) { model.runMonthlyTransits() }.disabled(model.reportIsRunning) } }
-            ReportOutput(model:model)
-            Text(transit
-                ? L10n.text("Транзиты показывают аспекты планет на выбранную дату к натальной карте. Месячный расчёт ищет точные события в пределах выбранного месяца.", "Transits compare planetary positions on a chosen date with the natal chart. The monthly report lists exact events within that month.")
-                : L10n.text("Синастрия сопоставляет две карты: положения планет одной карты в домах другой и аспекты между ними. Измените данные второй карты, затем нажмите «Сравнить карты».", "Synastry compares two charts: one person's planets in the other's houses and the aspects between them. Set the second chart, then choose Compare charts."))
-                .font(.caption).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
-        }.padding(28)
     }
 }
 

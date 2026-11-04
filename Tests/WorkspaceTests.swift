@@ -96,7 +96,7 @@ struct WorkspaceTests {
             checks.append("Graphic export name belongs to rendered preset, not current picker selection")
 
             model.input.year += 1
-            try require(model.snapshot == nil && model.report.isEmpty && model.graphicData == nil && model.graphicImage == nil,
+            try require(model.snapshot == nil && model.report.isEmpty && model.comparison == nil && model.graphicData == nil && model.graphicImage == nil,
                         "Changed primary input must clear every previous result")
             try require(model.graphicCaption.isEmpty && model.graphicExportName.isEmpty,
                         "Changed primary input must clear graphic provenance")
@@ -107,7 +107,7 @@ struct WorkspaceTests {
             model.renderGraphic()
             model.input.year += 1
             try await Task.sleep(for: .milliseconds(250))
-            try require(model.snapshot == nil && model.report.isEmpty && model.graphicData == nil,
+            try require(model.snapshot == nil && model.report.isEmpty && model.comparison == nil && model.graphicData == nil,
                         "Canceled jobs must not republish old primary results")
             try require(!model.isCalculating && !model.reportIsRunning && !model.graphicIsRunning,
                         "Invalidated jobs must clear busy states")
@@ -122,9 +122,22 @@ struct WorkspaceTests {
             try await Task.sleep(for: .milliseconds(250))
             try require(model.snapshot?.julianDay == primaryDay && primaryDay != nil,
                         "Secondary input must preserve the independent natal result")
-            try require(model.report.isEmpty && model.graphicData == nil && !model.reportIsRunning && !model.graphicIsRunning,
+            try require(model.report.isEmpty && model.comparison == nil && model.graphicData == nil && !model.reportIsRunning && !model.graphicIsRunning,
                         "Secondary input must invalidate pending derived outputs")
             checks.append("Secondary changes cancel dependent results while preserving the natal chart")
+
+            for transit in [false, true] {
+                model.runComparison(transit: transit)
+                try await waitUntilFinished { model.reportIsRunning }
+                try require(model.comparison?.transit == transit && !(model.comparison?.aspects.isEmpty ?? true), "Both native comparison modes must publish their real grid")
+            }
+            model.secondaryInput.day += 1
+            try require(model.comparison == nil, "Changed comparison input must discard the completed wheel")
+            model.runComparison(transit: false)
+            model.cancelReport()
+            try await Task.sleep(for: .milliseconds(150))
+            try require(model.comparison == nil && !model.reportIsRunning, "Canceled comparison must not publish a late wheel")
+            checks.append("Native comparison results switch modes, invalidate completed wheels and cancel pending calculations")
 
             model.runReport()
             try await waitUntilFinished { model.reportIsRunning }
@@ -152,7 +165,7 @@ struct WorkspaceTests {
             checks.append("Graphic captions capture both titles and are invalidated when either changes")
 
             model.preferences = ChartPreferences(enabledObjects: [1, 2], enabledAspects: [])
-            try require(model.snapshot == nil && model.report.isEmpty && model.graphicData == nil,
+            try require(model.snapshot == nil && model.report.isEmpty && model.comparison == nil && model.graphicData == nil,
                         "Preference changes must invalidate all prior results")
             try await waitUntilFinished { model.isCalculating }
             try require(Set(model.displaySnapshot?.positions.map(\.id) ?? []) == [1, 2]

@@ -39,6 +39,10 @@ final class WorkspaceModel: ObservableObject {
     @Published var isCalculating = false
     @Published var errorMessage: String?
     @Published var databaseNotice: String?
+    @Published var comparison: ComparisonSnapshot?
+    @Published var comparisonPlanet: Int?
+    @Published var comparisonSecondarySelected = false
+    @Published var comparisonAspect: ChartAspect?
     @Published var report = ""
     @Published var reportTitle = L10n.text("Положения планет")
     @Published var reportIsRunning = false
@@ -102,11 +106,37 @@ final class WorkspaceModel: ObservableObject {
     var unavailableObjectNames: [String] { displaySnapshot?.unavailableObjects.map { AstroStyle.name($0) } ?? [] }
     var selectedPosition: PlanetPosition? { snapshot?.positions.first { $0.id == selectedPlanet } }
     var mainPlanets: [PlanetPosition] { snapshot?.positions.filter { (1...10).contains($0.id) } ?? [] }
+    var comparisonIsVisible: Bool {
+        (section == .relationships && comparison?.transit == false) || (section == .transits && comparison?.transit == true)
+    }
+    var comparisonPosition: PlanetPosition? {
+        guard comparisonIsVisible, let id = comparisonPlanet else { return nil }
+        return (comparisonSecondarySelected ? comparison?.secondary : comparison?.primary)?.positions.first { $0.id == id }
+    }
+    func selectComparisonPlanet(_ id: Int, secondary: Bool) {
+        comparisonPlanet = id; comparisonSecondarySelected = secondary; comparisonAspect = nil
+        selectedSign = nil; selectedHouse = nil; showInspector = true
+    }
+    func selectComparisonAspect(_ aspect: ChartAspect) {
+        comparisonAspect = aspect; comparisonPlanet = nil; selectedSign = nil; selectedHouse = nil; showInspector = true
+    }
+    func selectComparisonHouse(_ house: Int) {
+        selectedHouse = house; selectedSign = nil; comparisonPlanet = nil; comparisonAspect = nil; showInspector = true
+    }
+    func selectComparisonSign(_ sign: Int) {
+        selectedSign = sign; selectedHouse = nil; comparisonPlanet = nil; comparisonAspect = nil; showInspector = true
+    }
+    var inspectorCusps: [Double]? { comparisonIsVisible ? comparison?.primary.houseCusps : snapshot?.houseCusps }
     var relevantPassages: [InterpretationRecord] {
         guard let library else { return [] }
         if let selectedRecord, section == .library { return [selectedRecord] }
         if let selectedSign { return library.forSign(index: selectedSign) }
-        if let house = selectedHouse, let cusps = snapshot?.houseCusps, cusps.indices.contains(house - 1) { return library.forHouse(number: house, sign: AstroStyle.sign(cusps[house - 1])) }
+        if let house = selectedHouse, let cusps = inspectorCusps, cusps.indices.contains(house - 1) { return library.forHouse(number: house, sign: AstroStyle.sign(cusps[house - 1])) }
+        if comparisonIsVisible {
+            if let aspect = comparisonAspect { return library.forAspect(first: aspect.first, second: aspect.second, angle: aspect.angle) }
+            if let planet = comparisonPosition { return library.forPlanet(id: planet.id, sign: planet.sign, house: planet.house) }
+            return []
+        }
         if let selectedAspect { return library.forAspect(first: selectedAspect.first, second: selectedAspect.second, angle: selectedAspect.angle) }
         guard let p = selectedPosition else { return [] }
         return library.forPlanet(id: p.id, sign: p.sign, house: p.house)
@@ -161,6 +191,10 @@ final class WorkspaceModel: ObservableObject {
         reportTask = nil
         reportIsRunning = false
         report = ""
+        comparison = nil
+        comparisonPlanet = nil
+        comparisonAspect = nil
+        selectedSign = nil; selectedHouse = nil
     }
 
     private func invalidateGraphic() {
@@ -361,14 +395,14 @@ final class WorkspaceModel: ObservableObject {
 
     func runComparison(transit: Bool) {
         invalidateReport()
-        let primary = input, other = secondaryInput
+        let primary = input, other = secondaryInput, options = preferences
         reportTitle = transit ? L10n.text("Транзиты к натальной карте") : L10n.text("Синастрия")
         reportIsRunning = true
         reportTask = Task {
             do {
-                let result = try await engine.relationship(primary, secondary: other, mode: transit ? "transit" : "synastry", preferences: preferences)
+                let result = try await engine.comparison(primary, secondary: other, transit: transit, preferences: options)
                 guard !Task.isCancelled else { return }
-                report = result; reportIsRunning = false
+                comparison = result; reportIsRunning = false
             } catch is CancellationError { }
             catch { if !Task.isCancelled { reportIsRunning = false; errorMessage = error.localizedDescription } }
         }

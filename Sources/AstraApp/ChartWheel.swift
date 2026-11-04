@@ -4,6 +4,10 @@ import SwiftUI
 /// Buttons are separate from the drawing, preserving keyboard/VoiceOver access.
 struct ChartWheel: View {
     let snapshot: ChartSnapshot
+    let secondarySnapshot: ChartSnapshot?
+    let comparisonAspects: [ChartAspect]
+    let selectedSecondaryPlanet: Int?
+    let selectSecondary: (Int) -> Void
     let selectedPlanet: Int
     let select: (Int) -> Void
     let selectSign: (Int) -> Void
@@ -18,7 +22,11 @@ struct ChartWheel: View {
          selectSign: @escaping (Int) -> Void = { _ in },
          selectAspect: @escaping (ChartAspect) -> Void = { _ in },
          selectHouse: @escaping (Int) -> Void = { _ in },
-         selectedAspect: ChartAspect? = nil, selectedSign: Int? = nil, selectedHouse: Int? = nil) {
+         selectedAspect: ChartAspect? = nil, selectedSign: Int? = nil, selectedHouse: Int? = nil,
+         secondarySnapshot: ChartSnapshot? = nil, comparisonAspects: [ChartAspect] = [],
+         selectedSecondaryPlanet: Int? = nil, selectSecondary: @escaping (Int) -> Void = { _ in }) {
+        self.secondarySnapshot = secondarySnapshot; self.comparisonAspects = comparisonAspects
+        self.selectedSecondaryPlanet = selectedSecondaryPlanet; self.selectSecondary = selectSecondary
         self.snapshot = snapshot; self.selectedPlanet = selectedPlanet; self.select = select
         self.selectSign = selectSign; self.selectAspect = selectAspect
         self.selectedAspect = selectedAspect; self.selectedSign = selectedSign
@@ -30,7 +38,13 @@ struct ChartWheel: View {
     private var positionsByID: [Int: PlanetPosition] {
         Dictionary(snapshot.positions.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
     }
+    private var secondaryPositions: [Int: PlanetPosition]? {
+        secondarySnapshot.map { Dictionary($0.positions.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first }) }
+    }
+    private var isComparison: Bool { secondarySnapshot != nil }
+    private var aspectRadius: CGFloat { isComparison ? 0.29 : 0.43 }
     private var visibleAspects: [ChartAspect] {
+        if isComparison { return comparisonAspects }
         let ids = Set(snapshot.positions.map(\.id))
         return snapshot.aspects.filter { ids.contains($0.first) && ids.contains($0.second) }
     }
@@ -41,11 +55,12 @@ struct ChartWheel: View {
             let diameter = min(geometry.size.width, geometry.size.height)
             let radius = max(1, diameter * 0.452)
             let labelScale = max(0.8, radius / 262)
-            let markers = markerPositions(radius: radius, center: center)
-            let conjunctions = ChartWheelGeometry.conjunctionMarkers(aspects: visibleAspects, positions: positionsByID, asc: asc, radius: radius, center: center)
+            let markers = ChartWheelGeometry.planetMarkers(positions: visiblePlanets, asc: asc, radius: radius, center: center, comparison: isComparison)
+            let secondaryMarkers = ChartWheelGeometry.planetMarkers(positions: secondarySnapshot?.positions ?? [], asc: asc, radius: radius, center: center, secondary: true, comparison: isComparison)
+            let conjunctions = ChartWheelGeometry.conjunctionMarkers(aspects: visibleAspects, positions: positionsByID, asc: asc, radius: radius, center: center, secondaryPositions: secondaryPositions)
             ZStack {
                 Canvas { context, _ in
-                    drawWheel(context: &context, center: center, radius: radius, markers: markers, conjunctions: conjunctions)
+                    drawWheel(context: &context, center: center, radius: radius, markers: markers, secondaryMarkers: secondaryMarkers, conjunctions: conjunctions)
                 }.allowsHitTesting(false).accessibilityHidden(true)
 
                 // Reuse the painted annulus for hit testing. Later layers keep
@@ -122,24 +137,9 @@ struct ChartWheel: View {
                     .accessibilityHint(L10n.text("Открыть описание знака", "Open the zodiac sign description"))
                 }
 
-                ForEach(visiblePlanets) { planet in
-                    Button { select(planet.id) } label: {
-                        VStack(spacing: 0) {
-                            Text(AstroStyle.glyph(planet.id)).font(AstroStyle.symbolFont(size: 25 * labelScale))
-                            Text("\(Int(planet.degreeInSign))°" + (planet.isRetrograde ? " ℞" : ""))
-                                .font(.system(size: 8 * labelScale, weight: .medium))
-                        }
-                        .foregroundStyle(AstroStyle.objectColor(planet.id))
-                        .frame(width: 32 * labelScale, height: 38 * labelScale)
-                        .background(planet.id == selectedPlanet ? AstroStyle.objectColor(planet.id).opacity(0.14) : Color.clear, in: RoundedRectangle(cornerRadius: 9))
-                        .overlay(RoundedRectangle(cornerRadius: 9).strokeBorder(planet.id == selectedPlanet ? AstroStyle.objectColor(planet.id).opacity(0.7) : .clear, lineWidth: 1))
-                        .contentShape(RoundedRectangle(cornerRadius: 9))
-                    }
-                    .buttonStyle(.plain)
-                    .position(markers[planet.id] ?? point(planet.longitude, radius: radius * 0.76, center: center))
-                    .help(planetDescription(planet))
-                    .accessibilityLabel(planetDescription(planet))
-                    .accessibilityHint(L10n.text("Открыть трактовку планеты", "Open the object interpretation"))
+                planetButtons(visiblePlanets, markers: markers, labelScale: labelScale, secondary: false)
+                if let secondarySnapshot {
+                    planetButtons(secondarySnapshot.positions, markers: secondaryMarkers, labelScale: labelScale, secondary: true)
                 }
             }
         }
@@ -147,7 +147,7 @@ struct ChartWheel: View {
         .accessibilityLabel(L10n.text("Зодиакальный круг", "Zodiac chart"))
     }
 
-    private func drawWheel(context: inout GraphicsContext, center: CGPoint, radius: CGFloat, markers: [Int: CGPoint], conjunctions: [String: CGPoint]) {
+    private func drawWheel(context: inout GraphicsContext, center: CGPoint, radius: CGFloat, markers: [Int: CGPoint], secondaryMarkers: [Int: CGPoint], conjunctions: [String: CGPoint]) {
         let labelScale = max(0.8, radius / 262)
         let ink = Color.primary.opacity(colorScheme == .dark ? 0.22 : 0.14)
         for (index, cusp) in snapshot.houseCusps.enumerated() {
@@ -161,35 +161,45 @@ struct ChartWheel: View {
                 context.stroke(sector, with: .color(AstroStyle.elementColors[index % 4].opacity(0.65)), lineWidth: 1.4)
             }
         }
-        for scale in [1.0, 0.85, 0.56] {
+        for scale in [1.0, ChartWheelGeometry.zodiacInner, ChartWheelGeometry.houseOuter, ChartWheelGeometry.houseInner] {
             let r = radius * scale
             context.stroke(Path(ellipseIn: CGRect(x: center.x-r, y: center.y-r, width: 2*r, height: 2*r)), with: .color(ink), lineWidth: scale == 1 ? 1.3 : 0.7)
         }
-        for degree in stride(from: 0, to: 360, by: 5) {
-            let p1 = point(Double(degree), radius: radius * (degree % 30 == 0 ? 0.85 : degree % 10 == 0 ? 0.97 : 0.985), center: center)
-            let p2 = point(Double(degree), radius: radius, center: center)
-            var path = Path(); path.move(to: p1); path.addLine(to: p2)
-            context.stroke(path, with: .color(ink), lineWidth: degree % 30 == 0 ? 1 : 0.6)
+        // A separate 360-degree scale between the zodiac and houses.
+        for degree in 0..<360 {
+            let length: CGFloat = degree % 10 == 0 ? 0.055 : degree % 5 == 0 ? 0.032 : 0.016
+            var tick = Path()
+            tick.move(to: point(Double(degree), radius: radius * (ChartWheelGeometry.zodiacInner - length), center: center))
+            tick.addLine(to: point(Double(degree), radius: radius * ChartWheelGeometry.zodiacInner, center: center))
+            context.stroke(tick, with: .color(ink.opacity(degree % 5 == 0 ? 1 : 0.65)), lineWidth: degree % 10 == 0 ? 0.9 : 0.5)
+            if degree % 30 == 0 {
+                var boundary = Path()
+                boundary.move(to: point(Double(degree), radius: radius * ChartWheelGeometry.zodiacInner, center: center))
+                boundary.addLine(to: point(Double(degree), radius: radius, center: center))
+                context.stroke(boundary, with: .color(ink), lineWidth: 0.8)
+            }
         }
         for (index, cusp) in snapshot.houseCusps.enumerated() {
             var path = Path()
-            path.move(to: point(cusp, radius: radius * 0.56, center: center))
-            path.addLine(to: point(cusp, radius: radius * 0.85, center: center))
+            path.move(to: point(cusp, radius: radius * ChartWheelGeometry.houseInner, center: center))
+            path.addLine(to: point(cusp, radius: radius * ChartWheelGeometry.houseOuter, center: center))
             context.stroke(path, with: .color(ink), lineWidth: index % 3 == 0 ? 1.3 : 0.7)
             let next = snapshot.houseCusps[(index + 1) % snapshot.houseCusps.count]
-            let middle = cusp + ((next - cusp + 360).truncatingRemainder(dividingBy: 360)) / 2
-            context.draw(Text("\(index + 1)").font(.system(size: 9 * labelScale, weight: selectedHouse == index + 1 ? .bold : .regular)).foregroundStyle(selectedHouse == index + 1 ? AstroStyle.elementColors[index % 4] : .secondary), at: point(middle, radius: radius * 0.58, center: center))
+            let middle = ChartWheelGeometry.houseMidpoint(cusp, next)
+            context.draw(Text("\(index + 1)").font(.system(size: 10 * labelScale, weight: selectedHouse == index + 1 ? .bold : .regular)).foregroundStyle(selectedHouse == index + 1 ? AstroStyle.elementColors[index % 4] : .secondary), at: point(middle, radius: radius * ChartWheelGeometry.houseMiddle, center: center))
         }
         for aspect in visibleAspects {
             guard let pair = aspectEndpoints(aspect, radius: radius, center: center) else { continue }
             let selected = selectedAspect?.id == aspect.id
-            let highlighted = selected || selectedPlanet == 0 || aspect.first == selectedPlanet || aspect.second == selectedPlanet
+            let highlighted = selected || (selectedPlanet == 0 && selectedSecondaryPlanet == nil) || aspect.first == selectedPlanet
+                || (isComparison ? aspect.second == selectedSecondaryPlanet : aspect.second == selectedPlanet)
             var path = Path(); path.move(to: pair.0); path.addLine(to: pair.1)
-            if let badge = conjunctions[aspect.id], let first = positionsByID[aspect.first], let second = positionsByID[aspect.second] {
-                path.move(to: point(ChartWheelGeometry.midpoint(first.longitude, second.longitude), radius: radius * 0.55, center: center))
+            if let badge = conjunctions[aspect.id], let first = positionsByID[aspect.first], let second = (secondaryPositions ?? positionsByID)[aspect.second] {
+                path.move(to: point(ChartWheelGeometry.midpoint(first.longitude, second.longitude), radius: radius * aspectRadius, center: center))
                 path.addLine(to: badge)
             }
-            context.stroke(path, with: .color(AstroStyle.aspectColor(aspect.angle).opacity(selected ? 1 : highlighted ? 0.65 : 0.20)), style: StrokeStyle(lineWidth: selected ? 2.8 : highlighted ? 1.3 : 0.8, dash: Int(aspect.angle) == 180 ? [4, 3] : []))
+            let opacity = selected ? 1.0 : isComparison && selectedPlanet == 0 && selectedSecondaryPlanet == nil ? (selectedAspect == nil ? 0.38 : 0.16) : highlighted ? 0.65 : 0.20
+            context.stroke(path, with: .color(AstroStyle.aspectColor(aspect.angle).opacity(opacity)), style: StrokeStyle(lineWidth: selected ? 2.8 : highlighted ? 1.3 : 0.8, dash: Int(aspect.angle) == 180 ? [4, 3] : []))
         }
         for (label, longitude) in [("ASC", asc), ("DSC", asc + 180)] {
             context.draw(Text(label).font(.system(size: 9 * labelScale, weight: .bold)).foregroundStyle(AstroStyle.accent), at: point(longitude, radius: radius + 15 * labelScale, center: center))
@@ -200,13 +210,9 @@ struct ChartWheel: View {
                 context.draw(Text(label).font(.system(size: 9 * labelScale, weight: .bold)).foregroundStyle(AstroStyle.accent), at: point(longitude, radius: radius + 13 * labelScale, center: center))
             }
         }
-        for planet in visiblePlanets {
-            let pointOnRing = point(planet.longitude, radius: radius * 0.85, center: center)
-            if let marker = markers[planet.id] {
-                var leader = Path(); leader.move(to: pointOnRing); leader.addLine(to: marker)
-                context.stroke(leader, with: .color(AstroStyle.objectColor(planet.id).opacity(0.4)), lineWidth: 0.6)
-            }
-            context.fill(Path(ellipseIn: CGRect(x: pointOnRing.x-2, y: pointOnRing.y-2, width: 4, height: 4)), with: .color(AstroStyle.objectColor(planet.id)))
+        drawLeaders(context: &context, planets: visiblePlanets, markers: markers, radius: radius, center: center, secondary: false)
+        if let secondarySnapshot {
+            drawLeaders(context: &context, planets: secondarySnapshot.positions, markers: secondaryMarkers, radius: radius, center: center, secondary: true)
         }
     }
 
@@ -214,43 +220,56 @@ struct ChartWheel: View {
         ChartWheelGeometry.point(longitude, asc: asc, radius: radius, center: center)
     }
 
-    /// Keep labels apart when extra points or a tight conjunction are enabled.
-    /// Leader lines preserve the exact calculated longitude on the outer ring.
-    private func markerPositions(radius: CGFloat, center: CGPoint) -> [Int: CGPoint] {
-        var placed: [Int: CGPoint] = [:]
-        for planet in visiblePlanets.sorted(by: { $0.longitude == $1.longitude ? $0.id < $1.id : $0.longitude < $1.longitude }) {
-            var candidates: [CGPoint] = []
-            for shift in [0.0, 4, -4, 8, -8, 12, -12, 16, -16] {
-                for lane in [0.76, 0.66] {
-                    candidates.append(point(planet.longitude + shift, radius: radius * lane, center: center))
-                }
+    private func drawLeaders(context: inout GraphicsContext, planets: [PlanetPosition], markers: [Int: CGPoint], radius: CGFloat, center: CGPoint, secondary: Bool) {
+        for planet in planets {
+            let anchor = point(planet.longitude, radius: radius * (secondary ? 0.49 : ChartWheelGeometry.houseInner), center: center)
+            if let marker = markers[planet.id] {
+                var leader = Path(); leader.move(to: anchor); leader.addLine(to: marker)
+                context.stroke(leader, with: .color(AstroStyle.objectColor(planet.id).opacity(0.45)), style: StrokeStyle(lineWidth: 0.6, dash: secondary ? [2, 2] : []))
             }
-            let chosen = candidates.first { candidate in
-                placed.values.allSatisfy { hypot($0.x - candidate.x, $0.y - candidate.y) >= 36 * max(0.8, radius / 262) }
-            } ?? candidates.max { a, b in
-                minimumDistance(a, to: Array(placed.values)) < minimumDistance(b, to: Array(placed.values))
-            } ?? point(planet.longitude, radius: radius * 0.76, center: center)
-            placed[planet.id] = chosen
+            let dot = Path(ellipseIn: CGRect(x: anchor.x-1.7, y: anchor.y-1.7, width: 3.4, height: 3.4))
+            if secondary { context.stroke(dot, with: .color(AstroStyle.objectColor(planet.id)), lineWidth: 0.8) }
+            else { context.fill(dot, with: .color(AstroStyle.objectColor(planet.id))) }
         }
-        return placed
     }
 
-    private func minimumDistance(_ point: CGPoint, to others: [CGPoint]) -> CGFloat {
-        others.map { hypot($0.x - point.x, $0.y - point.y) }.min() ?? .greatestFiniteMagnitude
+    private func planetButtons(_ planets: [PlanetPosition], markers: [Int: CGPoint], labelScale: CGFloat, secondary: Bool) -> some View {
+        ForEach(planets) { planet in
+            let selected = secondary ? selectedSecondaryPlanet == planet.id : selectedPlanet == planet.id
+            Button { if secondary { selectSecondary(planet.id) } else { select(planet.id) } } label: {
+                VStack(spacing: 0) {
+                    Text(AstroStyle.glyph(planet.id)).font(AstroStyle.symbolFont(size: (isComparison ? 18 : 25) * labelScale))
+                    Text("\(Int(planet.degreeInSign))°" + (planet.isRetrograde ? " ℞" : ""))
+                        .font(.system(size: (isComparison ? 7 : 8) * labelScale, weight: .medium))
+                }
+                .foregroundStyle(AstroStyle.objectColor(planet.id))
+                .frame(width: (isComparison ? 22 : 32) * labelScale, height: (isComparison ? 26 : 38) * labelScale)
+                .background(.background.opacity(0.85), in: RoundedRectangle(cornerRadius: 7))
+                .background(selected ? AstroStyle.objectColor(planet.id).opacity(0.18) : .clear, in: RoundedRectangle(cornerRadius: 7))
+                .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(AstroStyle.objectColor(planet.id).opacity(selected ? 0.9 : secondary ? 0.35 : 0), style: StrokeStyle(lineWidth: selected ? 1.5 : 0.7, dash: secondary ? [2, 2] : [])))
+                .contentShape(RoundedRectangle(cornerRadius: 7))
+            }
+            .buttonStyle(.plain)
+            .position(markers[planet.id] ?? .zero)
+            .help(planetDescription(planet, secondary: secondary))
+            .accessibilityLabel(planetDescription(planet, secondary: secondary))
+            .accessibilityHint(L10n.text("Открыть трактовку планеты", "Open the object interpretation"))
+        }
     }
+
     private func aspectEndpoints(_ aspect: ChartAspect, radius: CGFloat, center: CGPoint) -> (CGPoint, CGPoint)? {
-        guard let first = positionsByID[aspect.first], let second = positionsByID[aspect.second] else { return nil }
-        return (point(first.longitude, radius: radius * 0.55, center: center), point(second.longitude, radius: radius * 0.55, center: center))
+        guard let first = positionsByID[aspect.first], let second = (secondaryPositions ?? positionsByID)[aspect.second] else { return nil }
+        return (point(first.longitude, radius: radius * aspectRadius, center: center), point(second.longitude, radius: radius * aspectRadius, center: center))
     }
     private func segmentFrame(_ first: CGPoint, _ second: CGPoint) -> CGRect {
         CGRect(x: min(first.x, second.x) - 7, y: min(first.y, second.y) - 7,
                width: abs(first.x - second.x) + 14, height: abs(first.y - second.y) + 14)
     }
     private func aspectDescription(_ aspect: ChartAspect) -> String {
-        "\(AstroStyle.name(aspect.first)) · \(AstroStyle.aspectName(aspect.angle)) · \(AstroStyle.name(aspect.second))"
+        (isComparison ? "① " : "") + "\(AstroStyle.name(aspect.first)) · \(AstroStyle.aspectName(aspect.angle)) · \(isComparison ? "② " : "")\(AstroStyle.name(aspect.second))"
     }
-    private func planetDescription(_ planet: PlanetPosition) -> String {
-        "\(AstroStyle.name(planet.id)) · \(AstroStyle.signNames[planet.sign]) \(AstroStyle.position(planet.longitude)) · " + L10n.text("дом", "house") + " \(planet.house)"
+    private func planetDescription(_ planet: PlanetPosition, secondary: Bool = false) -> String {
+        (isComparison ? (secondary ? "② " : "① ") : "") + "\(AstroStyle.name(planet.id)) · \(AstroStyle.signNames[planet.sign]) \(AstroStyle.position(planet.longitude)) · " + L10n.text("дом", "house") + " \(planet.house)"
     }
 }
 

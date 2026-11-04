@@ -1,0 +1,82 @@
+{
+  "version": "0.3.5",
+  "scenario": "GUI idle after native synastry calculation and aspect selection, bundled Podvodny corpus",
+  "method": "15 ps snapshots at 2-second intervals; %cpu is ps rolling estimate, not interval CPU sampling; RSS is GUI process only",
+  "samples": [
+    {
+      "elapsedSeconds": 0,
+      "cpuPercent": 0,
+      "rssKiB": 219776
+    },
+    {
+      "elapsedSeconds": 2,
+      "cpuPercent": 0,
+      "rssKiB": 219776
+    },
+    {
+      "elapsedSeconds": 4,
+      "cpuPercent": 0,
+      "rssKiB": 219776
+    },
+    {
+      "elapsedSeconds": 6,
+      "cpuPercent": 0,
+      "rssKiB": 219776
+    },
+    {
+      "elapsedSeconds": 8,
+      "cpuPercent": 0,
+      "rssKiB": 214624
+    },
+    {
+      "elapsedSeconds": 10,
+      "cpuPercent": 0,
+      "rssKiB": 214624
+    },
+    {
+      "elapsedSeconds": 12,
+      "cpuPercent": 0,
+      "rssKiB": 214624
+    },
+    {
+      "elapsedSeconds": 14,
+      "cpuPercent": 0,
+      "rssKiB": 214624
+    },
+    {
+      "elapsedSeconds": 16,
+      "cpuPercent": 0,
+      "rssKiB": 214624
+    },
+    {
+      "elapsedSeconds": 18,
+      "cpuPercent": 0,
+      "rssKiB": 185936
+    },
+    {
+      "elapsedSeconds": 20,
+      "cpuPercent": 0,
+      "rssKiB": 185936
+    },
+    {
+      "elapsedSeconds": 22,
+      "cpuPercent": 0,
+      "rssKiB": 185936
+    },
+    {
+      "elapsedSeconds": 24,
+      "cpuPercent": 0,
+      "rssKiB": 185936
+    },
+    {
+      "elapsedSeconds": 26,
+      "cpuPercent": 0,
+      "rssKiB": 185936
+    },
+    {
+      "elapsedSeconds": 28,
+      "cpuPercent": 0,
+      "rssKiB": 185936
+    }
+  ]
+}

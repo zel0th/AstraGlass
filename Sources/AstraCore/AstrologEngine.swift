@@ -94,6 +94,14 @@ public struct ChartSnapshot: Codable, Sendable {
     public var rawReport: String?
 }
 
+/// `first` always belongs to primary; `second` always belongs to secondary.
+public struct ComparisonSnapshot: Sendable {
+    public let primary: ChartSnapshot
+    public let secondary: ChartSnapshot
+    public let aspects: [ChartAspect]
+    public let transit: Bool
+}
+
 public enum GraphicPreset: String, CaseIterable, Identifiable, Sendable {
     case natal, biwheel, composite, aspectGrid, astrocartography, sphere
     case horizon, orbit, globe, ephemeris, calendar
@@ -206,6 +214,31 @@ public actor AstrologEngine {
         return try await run(arguments: input.arguments + (preferences?.engineArguments() ?? []) + second + [flag, "nul", "nul"] + options)
     }
 
+    /// Use Astrolog's relationship grid, including its object-specific orbs.
+    /// Both charts share the primary zodiac/house convention, as in Astrolog's biwheel.
+    public func comparison(_ input: ChartInput, secondary: ChartInput, transit: Bool,
+                           preferences: ChartPreferences = .defaults) async throws -> ComparisonSnapshot {
+        try input.validate(); try secondary.validate()
+        var other = secondary
+        other.sidereal = input.sidereal; other.houseSystem = input.houseSystem
+        let primary = try await calculate(input, preferences: preferences)
+        try Task.checkCancellation()
+        let secondChart = try await calculate(other, preferences: preferences)
+        try Task.checkCancellation()
+        var second = Array(other.arguments.prefix(9)); second[0] = "-qb2"
+        let text = try await execute(arguments: ["--comparison-json"] + input.arguments
+            + preferences.engineArguments() + second + [transit ? "-rt" : "-r0", "nul", "nul"], timeout: 20)
+        struct Grid: Decodable { let aspects: [ChartAspect] }
+        guard let start = text.firstIndex(of: "{"), let end = text.lastIndex(of: "}") else { throw AstrologError.invalidOutput }
+        let grid = try JSONDecoder().decode(Grid.self, from: Data(text[start...end].utf8))
+        let firstIDs = Set(primary.positions.map(\.id)), secondIDs = Set(secondChart.positions.map(\.id))
+        let aspects = grid.aspects.filter {
+            firstIDs.contains($0.first) && secondIDs.contains($0.second) && preferences.enabledAspects.contains($0.kind)
+        }
+        guard aspects.allSatisfy({ $0.angle.isFinite && $0.orb.isFinite }) else { throw AstrologError.invalidOutput }
+        return ComparisonSnapshot(primary: primary, secondary: secondChart, aspects: aspects, transit: transit)
+    }
+
     /// Renders genuine Astrolog graphics into a private temporary BMP, reads its
     /// bytes, then removes the directory. No caller-supplied command or path can
     /// enable file writes. NSImage(data:) can decode the returned Windows BMP.
@@ -288,7 +321,7 @@ public actor AstrologEngine {
                 let process = Process()
                 process.executableURL = executable
                 let safePrefix = [graphics ? "-0n~" : "-0on~", "-YQ", "0"]
-                process.arguments = arguments.first == "--json" ? ["--json"] + safePrefix + arguments.dropFirst() : safePrefix + arguments
+                process.arguments = ["--json", "--comparison-json"].contains(arguments.first ?? "") ? [arguments[0]] + safePrefix + arguments.dropFirst() : safePrefix + arguments
                 // Palette BMP uses Astrolog's built-in vector map and needs no
                 // external earth.bmp texture for cartography/globe presets.
                 if graphics { process.arguments! += ["-Xbb", "-Xo", graphicURL.path] }

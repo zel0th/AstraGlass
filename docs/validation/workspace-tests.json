@@ -7,6 +7,7 @@
     "Primary input changes invalidate chart, report, graphic, and export metadata",
     "Pending primary calculations cannot republish after input changes",
     "Secondary changes cancel dependent results while preserving the natal chart",
+    "Native comparison results switch modes, invalidate completed wheels and cancel pending calculations",
     "Failed replacement reports never expose previous content under a new title",
     "Graphic captions capture both titles and are invalidated when either changes",
     "Settings invalidate stale results, filter the actual engine snapshot and persist",
@@ -17,6 +18,6 @@
     "All twelve houses open the inspector with matching passages; planet selection clears house selection"
   ],
   "failed" : 0,
-  "passed" : 15,
-  "timestamp" : "2026-11-04T22:14:56Z"
+  "passed" : 16,
+  "timestamp" : "2026-11-04T22:46:42Z"
 }

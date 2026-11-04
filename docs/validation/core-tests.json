@@ -4,6 +4,7 @@
     "Finite positions, unique IDs, twelve house cusps, valid ranges",
     "Object choices, both nodes, honest Charon availability, and each of 24 aspect switches",
     "Synastry runs through the same explicitly supplied executable",
+    "Native synastry\/transit grids: both real charts, directed cross-aspects, same-object conjunctions, exact engine orbs and preference filters",
     "All ten principal planets match original Astrolog CLI within its one-arcminute display precision",
     "UTC offsets +03:00, +05:30, and +14:00 across midnight give identical chart",
     "Seven house systems at southern latitude",
@@ -21,7 +22,7 @@
   ],
   "engine" : "Astrolog 8.00",
   "failed" : 0,
-  "passed" : 18,
+  "passed" : 19,
   "platform" : "Version 27.2 (Build 26B123)",
-  "timestamp" : "2026-11-04T21:30:26Z"
+  "timestamp" : "2026-11-04T22:38:48Z"
 }
